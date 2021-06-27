@@ -1,0 +1,44 @@
+{
+    "editor.rulers": [78],
+	"files.autoSave": "afterDelay",
+
+	// https://github.com/mkloubert/vscode-deploy-reloaded
+    "deploy.reloaded": {
+		"deployOnSave": true,
+		"packages": [
+			{
+				"name": "HotStrings Applications",
+				"targets": ["Applications"],
+                "exclude": ["**/*.ini"],
+                "files": ["HotStrings/**"],
+				"button": {
+					"text": "Deploy to D:/Applications"
+				}
+			},
+			{
+				"name": "HotStrings Zip",
+				"targets": ["zip"],
+                "exclude": ["**/*.ini"],
+                "files": ["HotStrings/**"],
+				"button": {
+					"text": "Deploy to Zip"
+				}
+			}
+		],
+		"targets": [
+			{
+				"type":"local",
+				"name": "Applications",
+				"dir": "D:/applications/"
+			},
+            {
+                "type": "zip",
+                "name": "zip",
+                "description": "Create a zip file in the bin directory",
+                "open": false,
+                "fileName": "HotStrings.zip",
+                "dir": "bin"
+            }
+		]
+	}
+}
