@@ -9,6 +9,7 @@ global txtPicker
 global hwndPicker
 
 Picker_Build() {
+    OutputDebug, % "-- Picker_Build()"
     Gui, Picker:New, -Caption +AlwaysOnTop +Border +HwndhwndPicker +LabelPicker_On
     Gui, +Owner +LabelPicker_On
     Gui, Font, s16 ;, Cascadia Bold
@@ -24,29 +25,35 @@ Picker_Build() {
 }
 
 Picker_OnEscape() {
+    OutputDebug, % "-- Picker_OnEscape()"
     Gui Picker:Hide
 }
 
 Picker_OnWMACTIVATEAPP(activated) {
+    OutputDebug, % "-- Picker_OnWMACTIVATEAPP()"
     if (!activated) {
         Gui, Picker:Hide
         return 0
-    } 
+    }
 }
 
 Picker_btnReload_OnClick() {
+    OutputDebug, % "-- Picker_btnReload_OnClick()"
     Reload
 }
 
 Picker_btnQuit_OnClick() {
+    OutputDebug, % "-- Picker_btnQuit_OnClick()"
     ExitApp, 0
 }
 
 Picker_btnEdit_OnClick() {
+    OutputDebug, % "-- Picker_btnEdit_OnClick()"
     RunWait %csvFile%
 }
 
 Picker_btnSubmit_OnClick() {
+    OutputDebug, % "-- Picker_btnSubmit_OnClick()"
     Gui, Picker:Default
     Gui, ListView, lvPicker
     row := LV_GetNext(0)
@@ -58,6 +65,7 @@ Picker_btnSubmit_OnClick() {
 }
 
 Picker_lvPicker_OnEvent() {
+    OutputDebug, % "-- Picker_lvPicker_OnEvent()"
     Gui, Picker:Default
     Gui, ListView, lvPicker
     LV_GetText(cell, A_EventInfo, 2)
@@ -72,6 +80,7 @@ Picker_lvPicker_OnEvent() {
 }
 
 Picker_Show() {
+    OutputDebug, % "-- Picker_Show()"
     static centers
     if !IsObject(centers) {
         Gui, Show, AutoSize Center
@@ -86,6 +95,7 @@ Picker_Show() {
 }
 
 Picker_GetMonitor() {
+    OutputDebug, % "-- Picker_GetMonitor()"
     CoordMode, Mouse, Screen
     MouseGetPos, mouseX, mouseY
     SysGet, monCount, MonitorCount
@@ -100,6 +110,7 @@ Picker_GetMonitor() {
 }
 
 Picker_FindCenters() {
+    OutputDebug, % "-- Picker_FindCenters()"
     centers := []
     WinGetPos,,, guiWidth, guiHeight, ahk_id %hwndPicker%
     SysGet, monCount, MonitorCount

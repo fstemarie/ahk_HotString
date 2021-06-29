@@ -12,6 +12,7 @@ Picker_Show()
 LoadData()
 
 Get_csvFile() {
+    OutputDebug, % "-- Get_csvFile()"
     configFile := (A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".ini")
     IniRead, csvFile, %configFile%, Configuration, csvFile
     if (csvFile == "ERROR") {
@@ -25,6 +26,7 @@ Get_csvFile() {
 }
 
 LoadData() {
+    OutputDebug, % "-- LoadData()"
 	objCSV := ObjCSV_CSV2Collection(csvFile, "HotString,Text,Category", False)
 
     ; Fill the ListView
@@ -42,11 +44,19 @@ LoadData() {
     ; Setup HotStrings
     Loop, % objCSV.MaxIndex() {
         row := objCSV[A_Index]
-        Hotstring("`:`:" . row.HotString . "`:`:", row.Text, On)
+        try {
+            Hotstring("`:`:" row.HotString, row.Text)
+            OutputDebug, % "Added HotString: " row.HotString
+        }
+        catch {
+            MsgBox "The hotstring does not exist or it has no variant for the current IfWin criteria."
+        }
     }
 }
 
 Password() {
+    OutputDebug, % "-- Password()"
+
     static password
     if (password = "") {
         cmd := "KeePassCommand getfield Citrix Password"
@@ -60,7 +70,7 @@ Password() {
 return
 
 F1::
-#`::
+OutputDebug, % "HotKey F1 Pressed"
 Loop 2 {
     Picker_Show()
 }
