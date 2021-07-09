@@ -34,18 +34,22 @@ LoadData() {
     Gui, ListView, lvPicker
     GuiControl, Hide, lvPicker
     LV_Delete()
-    ObjCSV_Collection2ListView(objCSV, Picker, lvPicker, strFieldOrder := "HotString,Text,Category")
-    LV_Modify(20, "+Focus +Select")
+    ObjCSV_Collection2ListView(objCSV, Picker, lvPicker, strFieldOrder := "HotString,Text,Category,Raw")
     LV_ModifyCol(1, AutoHDR)
     LV_ModifyCol(2, 1050)
     LV_ModifyCol(3, AutoHDR)
     GuiControl, Show, lvPicker
+    LV_Modify(20, "+Focus +Select")
 
     ; Setup HotStrings
     Loop, % objCSV.MaxIndex() {
         row := objCSV[A_Index]
         try {
-            Hotstring("`:`:" row.HotString, row.Text)
+            if (row.Raw) {
+                Hotstring("`:`:" row.HotString, row.Text)
+            } else {
+                HotString("`:R`:" row.HotString, row.Text)
+            }
             OutputDebug, % "Added HotString: " row.HotString
         }
         catch {
@@ -69,12 +73,24 @@ Password() {
 }
 return
 
+
+#IfWinNotActive, ahk_exe Code.exe
 F1::
 OutputDebug, % "HotKey F1 Pressed"
 Loop 2 {
     Picker_Show()
 }
 return
+#IfWinActive
+
+#F1::
+return
+#IfWinActive, PickerGui
+#F1::
+OutputDebug, % "HotKey WIN-F1 Pressed"
+Run, GeekSquad.ods, D:\francois\Documents
+return
+#IfWinActive
 
 #IfWinActive, Virtual Desktop - Desktop Viewer
 :*:###::
@@ -85,4 +101,4 @@ return
 :?:ino::ion
 ::PArfait::Parfait
 ::PArfais::Parfait
-::connectino::connexion
+::connexino::connexion
