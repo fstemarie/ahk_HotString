@@ -10,9 +10,9 @@ global hwndPicker
 
 Picker_Build() {
     OutputDebug, % "-- Picker_Build()"
-    Gui, Picker:New, -Caption +AlwaysOnTop +Border +HwndhwndPicker +LabelPicker_On
+    Gui, Picker:New, -Caption +AlwaysOnTop +Border +HwndhwndPicker +LabelPicker_On, PickerGui
     Gui, +Owner +LabelPicker_On
-    Gui, Font, s16 ;, Cascadia Bold
+    Gui, Font, s16, Cascadia Bold
     Gui, Margin, 10, 10
     Gui, Add, Button, w100 r1 gPicker_btnQuit_OnClick, Quit ; btnReload
     Gui, Add, Button, x+m w100 r1 gPicker_btnReload_OnClick, Reload ; btnQuit
