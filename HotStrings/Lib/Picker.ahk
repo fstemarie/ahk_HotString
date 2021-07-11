@@ -7,6 +7,8 @@
 global lvPicker
 global txtPicker
 global hwndPicker
+global lbCategories
+global category
 
 Picker_Build() {
     OutputDebug, % "-- Picker_Build()"
@@ -15,15 +17,18 @@ Picker_Build() {
     Gui, Font, s16, Cascadia Bold
     Gui, Margin, 10, 10
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick  ; btnSubmit
-    Gui, Add, ListView, xm ym w1310 r15 Hdr LV0x8 HwndhwndlvPicker vlvPicker gPicker_lvPicker_OnEvent AltSubmit -Multi +Border Report ; lvPicker
+    Gui, Add, ListView, xm ym w1140 r15 Hdr LV0x8 HwndhwndlvPicker vlvPicker gPicker_lvPicker_OnEvent AltSubmit -Multi +Border Report ; lvPicker
     PostMessage, 0x1047, 0, 1,, ahk_id %hwndlvPicker% ;LVM_SETHOVERTIME txtPicker
-    Gui, Add, Text, vtxtPicker w1310 r10 Border
+    Gui, Add, ListBox, x+m ym w150 hp 0x100 vlbCategories gPicker_lbCategories_OnEvent Sort ; lbCategories
+    Gui, Add, Text, vtxtPicker xm w1300 r10 Border
     Gui, Add, Button, xm y+m w100 r1 gPicker_btnQuit_OnClick, Quit ; btnReload
     Gui, Add, Button, x+m wp r1 gPicker_btnReload_OnClick, Reload ; btnQuit
     Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, Edit ; btnEdit
     Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Doc ; btnDoc
     Gui, Add, Button, x+m wp r1 gPicker_btnNote_OnClick, Notepad ; btnNote
     OnMessage(0x001C, "Picker_OnWMACTIVATEAPP") ;WM_ACTIVATEAPP
+    Picker_lbCategories_Update()
+    Picker_lvPicker_Update()
 }
 
 Picker_OnEscape() {
@@ -37,6 +42,86 @@ Picker_OnWMACTIVATEAPP(activated) {
         Gui, Picker:Hide
         return 0
     }
+}
+
+Picker_btnSubmit_OnClick() {
+    OutputDebug, % "-- Picker_btnSubmit_OnClick()"
+    Gui, Picker:Default
+    Gui, ListView, lvPicker
+    row := LV_GetNext(0)
+    if (row > 0) {
+        Gui, Picker:Hide
+        LV_GetText(cell, row, 2)
+        LV_GetText(treated, row, 4)
+        if (!treated) {
+            SendRaw, %cells%
+        } else {
+            Send, %cell%
+        }
+    }
+}
+
+Picker_lbCategories_OnEvent() {
+    global category
+    if (A_GuiEvent = "Normal") {
+        GuiControlGet, category,, lbCategories
+        Picker_lvPicker_Update()
+    }
+}
+
+Picker_lbCategories_Update() {
+    ; Setup categories
+    categories := "*|"
+    Loop, % objCSV.MaxIndex() {
+        row := objCSV[A_Index]
+        categories := categories . "|" . row.Category
+    }
+    Sort, categories, U D|
+    GuiControl, Text, lbCategories, %categories%
+}
+
+Picker_lvPicker_OnEvent() {
+    OutputDebug, % "-- Picker_lvPicker_OnEvent()"
+    Gui, Picker:Default
+    Gui, ListView, lvPicker
+    LV_GetText(cell, A_EventInfo, 2)
+    LV_GetText(treated, A_EventInfo, 4)
+    if (A_GuiEvent == "Normal") {
+        Gui, Picker:Hide
+        if (!treated) {
+            SendRaw, %cell%
+        } else {
+            Send, %cell%
+        }
+    } else if (A_GuiEvent == "I") {
+        Critical, On
+        GuiControl, Text, txtPicker, %cell%
+    }
+}
+
+Picker_lvPicker_Update() {
+    if (category and category != "*") {
+        objFiltered := []
+        Loop, % objCSV.MaxIndex() {
+            if (objCSV[A_Index].Category = category)
+                objFiltered.Push(objCSV[A_Index])
+        }
+    } else {
+        objFiltered := objCSV
+    }
+
+    ; Fill the ListView
+    Gui, Picker:Default
+    Gui, ListView, lvPicker
+    GuiControl, Hide, lvPicker
+    LV_Delete()
+    ObjCSV_Collection2ListView(objFiltered, Picker, lvPicker, strFieldOrder := "HotString,Text,Category,Treated")
+    LV_ModifyCol(1, AutoHDR)
+    LV_ModifyCol(2, 1005)
+    LV_ModifyCol(3, 0)
+    LV_ModifyCol(4, 0)
+    GuiControl, Show, lvPicker
+    LV_Modify(20, "+Focus +Select")
 }
 
 Picker_btnReload_OnClick() {
@@ -62,42 +147,6 @@ Picker_btnDoc_OnClick() {
 Picker_btnNote_OnClick() {
     OutputDebug, % "-- Picker_btnNote_OnClick()"
     Run notepad.exe
-}
-
-Picker_btnSubmit_OnClick() {
-    OutputDebug, % "-- Picker_btnSubmit_OnClick()"
-    Gui, Picker:Default
-    Gui, ListView, lvPicker
-    row := LV_GetNext(0)
-    if (row > 0) {
-        Gui, Picker:Hide
-        LV_GetText(cell, row, 2)
-        LV_GetText(treated, row, 4)
-        if (!treated) {
-            SendRaw, %cells%
-        } else {
-            Send, %cell%
-        }
-    }
-}
-
-Picker_lvPicker_OnEvent() {
-    OutputDebug, % "-- Picker_lvPicker_OnEvent()"
-    Gui, Picker:Default
-    Gui, ListView, lvPicker
-    LV_GetText(cell, A_EventInfo, 2)
-    LV_GetText(treated, A_EventInfo, 4)
-    if (A_GuiEvent == "Normal") {
-        Gui, Picker:Hide
-        if (!treated) {
-            SendRaw, %cell%
-        } else {
-            Send, %cell%
-        }
-    } else if (A_GuiEvent == "I") {
-        Critical, On
-        GuiControl, Text, txtPicker, %cell%
-    }
 }
 
 Picker_Show() {

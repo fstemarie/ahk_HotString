@@ -6,10 +6,11 @@ SendMode Input  ; Recommended for new scripts due to its superior speed and reli
 SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 global csvFile := Get_csvFile()
+global objCSV := ObjCSV_CSV2Collection(csvFile, "HotString,Text,Category,Treated", False, strFileEncoding:="UTF-16")
 
+Load_HotStrings()
 Picker_Build()
 Picker_Show()
-LoadData()
 return
 
 Get_csvFile() {
@@ -26,10 +27,8 @@ Get_csvFile() {
     return csvFile
 }
 
-LoadData() {
+Load_HotStrings() {
     OutputDebug, % "-- LoadData()"
-	objCSV := ObjCSV_CSV2Collection(csvFile, "HotString,Text,Category,Treated", False, strFileEncoding:="UTF-16")
-
     ; Setup HotStrings
     Loop, % objCSV.MaxIndex() {
         row := objCSV[A_Index]
@@ -45,19 +44,6 @@ LoadData() {
             MsgBox "The hotstring does not exist or it has no variant for the current IfWin criteria."
         }
     }
-
-    ; Fill the ListView
-    Gui, Picker:Default
-    Gui, ListView, lvPicker
-    GuiControl, Hide, lvPicker
-    LV_Delete()
-    ObjCSV_Collection2ListView(objCSV, Picker, lvPicker, strFieldOrder := "HotString,Text,Category,Treated")
-    LV_ModifyCol(1, AutoHDR)
-    LV_ModifyCol(2, 1025)
-    LV_ModifyCol(3, AutoHDR)
-    LV_ModifyCol(4, 0)
-    GuiControl, Show, lvPicker
-    LV_Modify(20, "+Focus +Select")
 }
 
 Password() {
