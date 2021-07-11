@@ -10,6 +10,7 @@ global csvFile := Get_csvFile()
 Picker_Build()
 Picker_Show()
 LoadData()
+return
 
 Get_csvFile() {
     OutputDebug, % "-- Get_csvFile()"
@@ -27,28 +28,16 @@ Get_csvFile() {
 
 LoadData() {
     OutputDebug, % "-- LoadData()"
-	objCSV := ObjCSV_CSV2Collection(csvFile, "HotString,Text,Category", False)
-
-    ; Fill the ListView
-    Gui, Picker:Default
-    Gui, ListView, lvPicker
-    GuiControl, Hide, lvPicker
-    LV_Delete()
-    ObjCSV_Collection2ListView(objCSV, Picker, lvPicker, strFieldOrder := "HotString,Text,Category,Raw")
-    LV_ModifyCol(1, AutoHDR)
-    LV_ModifyCol(2, 1050)
-    LV_ModifyCol(3, AutoHDR)
-    GuiControl, Show, lvPicker
-    LV_Modify(20, "+Focus +Select")
+	objCSV := ObjCSV_CSV2Collection(csvFile, "HotString,Text,Category,Treated", False, strFileEncoding:="UTF-16")
 
     ; Setup HotStrings
     Loop, % objCSV.MaxIndex() {
         row := objCSV[A_Index]
         try {
-            if (row.Raw) {
-                Hotstring("`:`:" row.HotString, row.Text)
+            if (!row.Treated) {
+                Hotstring("`:R`:" row.HotString, row.Text)
             } else {
-                HotString("`:R`:" row.HotString, row.Text)
+                HotString("`:`:" row.HotString, row.Text)
             }
             OutputDebug, % "Added HotString: " row.HotString
         }
@@ -56,6 +45,19 @@ LoadData() {
             MsgBox "The hotstring does not exist or it has no variant for the current IfWin criteria."
         }
     }
+
+    ; Fill the ListView
+    Gui, Picker:Default
+    Gui, ListView, lvPicker
+    GuiControl, Hide, lvPicker
+    LV_Delete()
+    ObjCSV_Collection2ListView(objCSV, Picker, lvPicker, strFieldOrder := "HotString,Text,Category,Treated")
+    LV_ModifyCol(1, AutoHDR)
+    LV_ModifyCol(2, 1025)
+    LV_ModifyCol(3, AutoHDR)
+    LV_ModifyCol(4, 0)
+    GuiControl, Show, lvPicker
+    LV_Modify(20, "+Focus +Select")
 }
 
 Password() {
@@ -74,7 +76,7 @@ Password() {
 return
 
 
-#IfWinNotActive, ahk_exe Code.exe
+; #IfWinNotActive, ahk_exe Code.exe
 F1::
 OutputDebug, % "HotKey F1 Pressed"
 Loop 2 {
