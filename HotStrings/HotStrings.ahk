@@ -15,6 +15,7 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 ; WM_NOTIFY          := 0x004E
 ; WM_ACTIVATEAPP     := 0x001C
 
+global version = 1
 global lvPicker
 global txtPicker
 global hwndPicker
@@ -25,6 +26,11 @@ global objCSV := ObjCSV_CSV2Collection(csvFile, "HotString,Text,Category,Treated
 
 ; ----------------------------------------------------------------------
 ;region Auto-Execute Section
+if (Updates_Available()) {
+    TrayTip, Updates, Updates are available
+    Menu, Tray, Add
+    Menu, Tray, Add, Update, Update
+}
 Load_HotStrings()
 Picker_Build()
 Picker_Show()
@@ -81,6 +87,26 @@ Get_csvFile() {
         }
     }
     return csvFile
+}
+
+Updates_Available() {
+    global version
+    static updatesAvailable = "New"
+
+    if (updatesAvailable = "New") {
+        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", "https://raw.githubusercontent.com/fstemarie/ahk_HotStrings/master/version.txt", true)
+        whr.Send()
+        whr.WaitForResponse()
+        gh_version := Format("{:i}", whr.ResponseText)
+        updatesAvailable := (gh_version > version)
+    }
+    return updatesAvailable
+}
+
+Update() {
+    UrlDownloadToFile, https://raw.githubusercontent.com/fstemarie/ahk_HotStrings/master/HotStrings/HotStrings.ahk, %A_ScriptFullPath%
+    Reload
 }
 
 Load_HotStrings() {
