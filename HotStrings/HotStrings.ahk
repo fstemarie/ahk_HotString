@@ -1,10 +1,10 @@
 ﻿; ----------------------------------------------------------------------------
 ;region Script level settings
 #SingleInstance, force
-#NoEnv  ; Recommended for performance and compatibility
-SendMode Input  ; Recommended for new scripts
+#NoEnv ; Recommended for performance and compatibility
+SendMode Input ; Recommended for new scripts
 ; SetKeyDelay 20
-SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
+SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 ;endregion
 ; ----------------------------------------------------------------------------
 
@@ -18,9 +18,8 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 global version = 1
 global category
-global csvFile := Get_csvFile()
+global csvFile := Get_CsvFile()
 global objCSV
-
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
@@ -28,7 +27,7 @@ Notify_Updates()
 Check_Dependencies()
 Create_HotStrings()
 objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
-        , "HotString,Text,Category,Treated", False)
+, "HotString,Text,Category,Treated", False)
 Func("Picker_Build").call()
 Func("Picker_Show").call()
 return
@@ -57,7 +56,7 @@ Check_Dependencies() {
     file := libDir . "\ObjCSV.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-            . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
+        . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -65,7 +64,7 @@ Check_Dependencies() {
     file := libDir . "\Picker.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-            . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
+        . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -80,7 +79,7 @@ Check_Updates() {
 
     if (updatesAvailable = "New") {
         url := "https://raw.githubusercontent.com/"
-            . "fstemarie/ahk_HotStrings/master/version.txt"
+        . "fstemarie/ahk_HotStrings/master/version.txt"
         whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
         whr.Open("GET", url, true)
         whr.Send()
@@ -91,16 +90,18 @@ Check_Updates() {
     return updatesAvailable
 }
 
-Get_csvFile() {
+Get_CsvFile() {
     OutputDebug, % "-- Get_csvFile()"
-    configFile := (A_ScriptDir . "\" . SubStr(A_ScriptName, 1, -4) . ".ini")
-    IniRead, csvFile, %configFile%, Configuration, csvFile
+    configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
+    IniRead, csvFile, %configFile%, Configuration, CsvFile
     if (csvFile == "ERROR") {
-        FileSelectFile, fsfValue, 3,, "Choose your HotStrings CSV file, "
-            . "Comma Separated Values (*.csv)"
+        FileSelectFile, fsfValue, 3,, Choose your HotStrings CSV file
+        , CSV File (*.csv)
         if (fsfValue) {
-            IniWrite, %fsfValue%, %configFile%, Configuration, csvFile
+            IniWrite, %fsfValue%, %configFile%, Configuration, CsvFile
             csvFile := fsfValue
+        } else {
+            ExitApp, 1
         }
     }
     return csvFile
@@ -121,7 +122,7 @@ Create_HotStrings() {
         }
         catch {
             MsgBox "The hotstring does not exist or it has no variant for "
-                . "the current IfWin criteria."
+            . "the current IfWin criteria."
         }
     }
 }
@@ -132,7 +133,7 @@ Fetch_Password() {
     if (password = "") {
         cmd := "KeePassCommand getfield Citrix Password"
         out := ComObjCreate("WScript.Shell")
-            .Exec(A_ComSpec . " /q /c " . cmd).StdOut.ReadAll()
+        .Exec(A_ComSpec . " /q /c " . cmd).StdOut.ReadAll()
         out := StrSplit(out, "`r`n")[4]
         out := RegExReplace(out, "\s+", " ")
         password := StrSplit(out, " ")[3]
@@ -143,7 +144,7 @@ Fetch_Password() {
 Update_Script() {
     OutputDebug, % "-- Update_Script()"
     url := "https://raw.githubusercontent.com/fstemarie/"
-        . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
+    . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%
     Reload
 }
@@ -156,17 +157,17 @@ return
 
 ; #IfWinNotActive, ahk_exe Code.exe
 F1::
-OutputDebug, % "HotKey F1 Pressed"
-Loop 2 {
-    Func("Picker_Show").call()
-}
+    OutputDebug, % "HotKey F1 Pressed"
+    Loop 2 {
+        Func("Picker_Show").call()
+    }
 return
 #IfWinActive
 
 #IfWinActive, PickerGui
 #F1::
-OutputDebug, % "HotKey WIN-F1 Pressed"
-Run, GeekSquad.ods, D:\francois\Documents
+    OutputDebug, % "HotKey WIN-F1 Pressed"
+    Run, GeekSquad.ods, D:\francois\Documents
 return
 #IfWinActive
 
