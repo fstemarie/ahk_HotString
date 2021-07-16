@@ -16,7 +16,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include *i <ObjCSV>
 #include *i <Picker>
 
-global version = 1
+global version = 2
 global category
 global csvFile := Get_CsvFile()
 global objCSV
@@ -25,9 +25,9 @@ global objCSV
 ;region Auto-Execute Section
 Notify_Updates()
 Check_Dependencies()
-Create_HotStrings()
 objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
-, "HotString,Text,Category,Treated", False)
+    , "HotString,Text,Category,Treated", False)
+Create_HotStrings()
 Func("Picker_Build").call()
 Func("Picker_Show").call()
 return
@@ -41,7 +41,7 @@ Notify_Updates() {
     if (Check_Updates()) {
         TrayTip, Updates, Updates are available
         Menu, Tray, Add
-        Menu, Tray, Add, Update, Update
+        Menu, Tray, Add, Update, Update_Script
     }
 }
 
