@@ -18,53 +18,20 @@ SetWorkingDir %A_ScriptDir%  ; Ensures a consistent starting directory.
 
 global version = 1
 global category
-global Get_Data
-global Fill_Listview
-global csvFile
+global csvFile := Get_csvFile()
 global objCSV
+
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
 Notify_Updates()
 Check_Dependencies()
-Load_Data()
 Create_HotStrings()
-Picker_Build()
-; Picker_Show()
+objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
+        , "HotString,Text,Category,Treated", False)
+Func("Picker_Build").call()
+Func("Picker_Show").call()
 return
-;endregion
-; ----------------------------------------------------------------------------
-
-; ----------------------------------------------------------------------------
-;region HotKeys and HotStrings definitions
-
-; #IfWinNotActive, ahk_exe Code.exe
-F1::
-OutputDebug, % "HotKey F1 Pressed"
-Loop 2 {
-    Picker_Show()
-}
-return
-#IfWinActive
-
-#IfWinActive, PickerGui
-#F1::
-OutputDebug, % "HotKey WIN-F1 Pressed"
-Run, GeekSquad.ods, D:\francois\Documents
-return
-#IfWinActive
-
-#IfWinActive, Virtual Desktop - Desktop Viewer
-:*:###::
-    SendRaw % Fetch_Password()
-return
-#IfWinActive
-
-:?:ino::ion
-::PArfait::Parfait
-::PArfais::Parfait
-::connexino::connexion
-:C:JE::Je
 ;endregion
 ; ----------------------------------------------------------------------------
 
@@ -81,6 +48,7 @@ Notify_Updates() {
 
 Check_Dependencies() {
     OutputDebug, % "-- Check_Dependencies()"
+    hasToReload := false
     libDir := A_ScriptDir . "\Lib"
     if (!FileExist(libDir))
         FileCreateDir, %libDir%
@@ -91,18 +59,18 @@ Check_Dependencies() {
         url := "https://raw.githubusercontent.com/"
             . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
         UrlDownloadToFile, %url%, %file%
-        Reload
+        hasToReload := true
     }
     ; Picker.ahk
     file := libDir . "\Picker.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-            . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
+            . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
         UrlDownloadToFile, %url%, %file%
-        Reload
+        hasToReload := true
     }
-    global Get_Data := Func("ObjCSV_CSV2Collection")
-    global Fill_Listview := Func("ObjCSV_Collection2Listview")
+    if (hasToReload)
+        Reload
 }
 
 Check_Updates() {
@@ -121,12 +89,6 @@ Check_Updates() {
         updatesAvailable := (gh_version > version)
     }
     return updatesAvailable
-}
-
-Load_Data() {
-    global csvFile := Get_csvFile()
-    global objCSV := Get_Data.call(csvFile
-        , "HotString,Text,Category,Treated", False)
 }
 
 Get_csvFile() {
@@ -186,5 +148,38 @@ Update_Script() {
     Reload
 }
 return
+;endregion
+; ----------------------------------------------------------------------------
+
+; ----------------------------------------------------------------------------
+;region HotKeys and HotStrings definitions
+
+; #IfWinNotActive, ahk_exe Code.exe
+F1::
+OutputDebug, % "HotKey F1 Pressed"
+Loop 2 {
+    Func("Picker_Show").call()
+}
+return
+#IfWinActive
+
+#IfWinActive, PickerGui
+#F1::
+OutputDebug, % "HotKey WIN-F1 Pressed"
+Run, GeekSquad.ods, D:\francois\Documents
+return
+#IfWinActive
+
+#IfWinActive, Virtual Desktop - Desktop Viewer
+:*:###::
+    SendRaw % Fetch_Password()
+return
+#IfWinActive
+
+:?:ino::ion
+::PArfait::Parfait
+::PArfais::Parfait
+::connexino::connexion
+:C:JE::Je
 ;endregion
 ; ----------------------------------------------------------------------------
