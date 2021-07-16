@@ -16,33 +16,65 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include *i <ObjCSV>
 #include *i <Picker>
 
-global version = 2
+global version = 1
 global category
 global csvFile := Get_CsvFile()
 global objCSV
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
-Notify_Updates()
-Check_Dependencies()
-objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
-    , "HotString,Text,Category,Treated", False)
-Create_HotStrings()
-Func("Picker_Build").call()
-Func("Picker_Show").call()
+Check_Updated() ; Checks to see if it's been updated to notify the user
+Notify_Updates() ; Checks to see if a new version is out
+Check_Dependencies() ; Checks for and download the dependencies
+Load_CSV() ; Loads the data from the CSV file
+Create_HotStrings() ; From the loaded data, create the hotstrings
+Func("Picker_Build").call() ; Build the Gui
+Func("Picker_Show").call() ; Show the Gui that we just built
 return
 ;endregion
 ; ----------------------------------------------------------------------------
 
 ; ----------------------------------------------------------------------------
 ;region Code unrelated to Gui
+Check_Updated() {
+    if (FileExist(A_ScriptDir . "\updated.txt")) {
+        FileDelete, %A_ScriptDir%\updated.txt
+        TrayTip, Updates, The script has been updated
+    }
+}
+
 Notify_Updates() {
     OutputDebug, % "-- Notify_Updates()"
     if (Check_Updates()) {
-        TrayTip, Updates, Updates are available
-        Menu, Tray, Add
-        Menu, Tray, Add, Update, Update_Script
+        Update_Script()
     }
+}
+
+Check_Updates() {
+    OutputDebug, % "-- Check_Updates()"
+    global version
+    static updatesAvailable = "New"
+
+    if (updatesAvailable = "New") {
+        url := "https://raw.githubusercontent.com/"
+        . "fstemarie/ahk_HotStrings/master/version.txt"
+        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
+        whr.Open("GET", url, true)
+        whr.Send()
+        whr.WaitForResponse()
+        gh_version := Format("{:i}", whr.ResponseText)
+        updatesAvailable := (gh_version > version)
+    }
+    return updatesAvailable
+}
+
+Update_Script() {
+    OutputDebug, % "-- Update_Script()"
+    url := "https://raw.githubusercontent.com/fstemarie/"
+    . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
+    UrlDownloadToFile, %url%, %A_ScriptFullPath%
+    FileAppend, "", %A_ScriptDir% . "\updated.txt"
+    Reload
 }
 
 Check_Dependencies() {
@@ -72,24 +104,6 @@ Check_Dependencies() {
         Reload
 }
 
-Check_Updates() {
-    OutputDebug, % "-- Check_Updates()"
-    global version
-    static updatesAvailable = "New"
-
-    if (updatesAvailable = "New") {
-        url := "https://raw.githubusercontent.com/"
-        . "fstemarie/ahk_HotStrings/master/version.txt"
-        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", url, true)
-        whr.Send()
-        whr.WaitForResponse()
-        gh_version := Format("{:i}", whr.ResponseText)
-        updatesAvailable := (gh_version > version)
-    }
-    return updatesAvailable
-}
-
 Get_CsvFile() {
     OutputDebug, % "-- Get_csvFile()"
     configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
@@ -105,6 +119,11 @@ Get_CsvFile() {
         }
     }
     return csvFile
+}
+
+Load_CSV() {
+    objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
+        , "HotString,Text,Category,Treated", False)
 }
 
 Create_HotStrings() {
@@ -139,14 +158,6 @@ Fetch_Password() {
         password := StrSplit(out, " ")[3]
     }
     return password
-}
-
-Update_Script() {
-    OutputDebug, % "-- Update_Script()"
-    url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
-    UrlDownloadToFile, %url%, %A_ScriptFullPath%
-    Reload
 }
 return
 ;endregion
