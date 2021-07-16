@@ -114,7 +114,7 @@ Picker_lvPicker_Update() {
     Gui, ListView, lvPicker
     GuiControl, Hide, lvPicker
     LV_Delete()
-    Fill_Listview.call(objFiltered, Picker
+    Func("ObjCSV_Collection2Listview").call(objFiltered, Picker
         , lvPicker, strFieldOrder := "HotString,Text,Category,Treated")
     LV_ModifyCol(1, AutoHDR)
     LV_ModifyCol(2, 1005)
