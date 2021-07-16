@@ -6,6 +6,9 @@ global txtPicker
 global hwndPicker
 global lbCategories
 
+if (A_ScriptName = "Picker.ahk")
+    ExitApp 1
+
 Picker_Build() {
     OutputDebug, % "-- Picker_Build()"
     Gui, Picker:New, +Owner +Border +HwndhwndPicker, PickerGui
@@ -22,8 +25,8 @@ Picker_Build() {
     Gui, Add, Text, vtxtPicker xm w1300 r10 Border
     Gui, Add, Button, xm y+m w100 r1 gPicker_btnQuit_OnClick, Quit ;btnReload
     Gui, Add, Button, x+m wp r1 gPicker_btnReload_OnClick, Reload ;btnQuit
-    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, Edit ;btnEdit
-    Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Doc ;btnDoc
+    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, Edit CSV ;btnEdit
+    Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Edit Doc ;btnDoc
     Gui, Add, Button, x+m wp r1 gPicker_btnNote_OnClick, Notepad ;btnNote
     OnMessage(0x001C, "Picker_OnWMACTIVATEAPP") ;WM_ACTIVATEAPP
     Picker_lbCategories_Update()
@@ -136,12 +139,46 @@ Picker_btnQuit_OnClick() {
 
 Picker_btnEdit_OnClick() {
     OutputDebug, % "-- Picker_btnEdit_OnClick()"
-    RunWait %csvFile%
+    static editor := false
+    if (!editor) {
+        configFile := SubStr(A_ScriptFullPath, 1, -4) . ".ini"
+        IniRead, editor, %configFile%, Configuration, Editor
+        if (editor == "ERROR") {
+            Gui Picker:Hide
+            FileSelectFile, fsfValue, 3, C:\Windows\notepad.exe
+                , Choose your CSV text editor, Text Editor (*.exe)
+            if (fsfValue) {
+                IniWrite, %fsfValue%, %configFile%, Configuration, Editor
+                editor := fsfValue
+            } else {
+                editor := false
+                return
+            }
+        }
+    }
+    Run %editor% %csvFile%
 }
 
 Picker_btnDoc_OnClick() {
     OutputDebug, % "-- Picker_btnDoc_OnClick()"
-    Run, GeekSquad.ods, D:\francois\Documents
+    static doc
+    if (!doc) {
+        configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
+        IniRead, doc, %configFile%, Configuration, Document
+        if (doc == "ERROR") {
+            Gui Picker:Hide
+            FileSelectFile, fsfValue, 3, %A_MyDocuments%
+                , Choose your document, Document (*.*)
+            if (fsfValue) {
+                IniWrite, %fsfValue%, %configFile%, Configuration, Document
+                doc := fsfValue
+            } else {
+                doc := false
+                return
+            }
+        }
+    }
+    Run, %doc%
 }
 
 Picker_btnNote_OnClick() {
