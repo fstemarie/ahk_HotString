@@ -20,9 +20,11 @@ global version = 3
 global category
 global csvFile := Get_CsvFile()
 global objCSV
+global hsCache := {}
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
+Random,, NewSeed
 Check_Updated() ; Checks to see if it's been updated to notify the user
 Notify_Updates() ; Checks to see if a new version is out
 Check_Dependencies() ; Checks for and download the dependencies
@@ -123,26 +125,63 @@ Get_CsvFile() {
 
 Load_CSV() {
     objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
-        , "HotString,Text,Category,Treated", False)
+        , "Trigger,Text,Category,Treated", False)
+
+    ; Remove rows that don't have the Text field filled
+    i := objCSV.MaxIndex()
+    while i >= objCSV.MinIndex() {
+        if (!objCSV[i].Text)
+            objCSV.RemoveAt(i)
+        i--
+    }
+
 }
 
 Create_HotStrings() {
-    OutputDebug, % "-- Load_HotStrings()"
+    OutputDebug, % "-- Create_HotStrings()"
+
+    ; Sort the data based on the Trigger field
+    sortedCSV := ObjCSV_SortCollection(objCSV, "Trigger")
+
     ; Setup HotStrings
-    Loop, % objCSV.MaxIndex() {
-        row := objCSV[A_Index]
-        try {
-            if (!row.Treated) {
-                Hotstring("`:R`:" row.HotString, row.Text)
-            } else {
-                HotString("`:`:" row.HotString, row.Text)
+    Loop, % sortedCSV.MaxIndex() {
+        lastRow := row.Clone()
+        row := sortedCSV[A_Index]
+        if (lastRow and row.Trigger = lastRow.Trigger) {
+            HotString("`:RX`:" . row.Trigger, "Send_RandomizedText")
+            if !hsCache.HasKey(row.Trigger)
+                hsCache[row.Trigger] := [lastRow.Text]
+            hsCache[row.Trigger].Push(row.Text)
+
+        } else {
+            if (row.Trigger) {
+                try {
+                    if (!row.Treated) {
+                        Hotstring("`:R`:" row.Trigger, row.Text)
+                    } else {
+                        HotString("`:`:" row.Trigger, row.Text)
+                    }
+                    OutputDebug, % "Added HotString: " row.Trigger
+                }
+                catch {
+                    MsgBox "The hotstring does not exist or it has no"
+                    . " variant for the current IfWin criteria."
+                }
             }
-            OutputDebug, % "Added HotString: " row.HotString
         }
-        catch {
-            MsgBox "The hotstring does not exist or it has no variant for "
-            . "the current IfWin criteria."
-        }
+    }
+}
+
+Send_RandomizedText() {
+    global hsCache
+
+    hs := SubStr(A_ThisHotkey, 4)
+    if hsCache.HasKey(hs) {
+        OutputDebug, % "hs = " . hs
+        OutputDebug, % "hsCache[hs].MinIndex() = " . hsCache[hs].MinIndex()
+        OutputDebug, % "hsCache[hs].MaxIndex() = " . hsCache[hs].MaxIndex()
+        Random, rndIndex, % hsCache[hs].MinIndex(), hsCache[hs].MaxIndex()
+        SendRaw, % hsCache[hs][rndIndex]
     }
 }
 

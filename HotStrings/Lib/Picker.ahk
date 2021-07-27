@@ -38,11 +38,16 @@ Picker_OnEscape() {
     Gui Picker:Hide
 }
 
-Picker_OnWMACTIVATEAPP(activated) {
-    OutputDebug, % "-- Picker_OnWMACTIVATEAPP()"
-    if (!activated) {
-        Gui, Picker:Hide
-        return 0
+Picker_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
+    if (hwnd = hwndPicker) {
+        OutputDebug, % "-- Picker_OnWMACTIVATEAPP()"
+        if (!wParam) {
+            OutputDebug, % A_Tab . "Window Deactivated"
+            Gui, Picker:Hide
+            return 0
+        } else {
+            OutputDebug, % A_Tab . "Window Activated"
+        }
     }
 }
 
@@ -118,7 +123,7 @@ Picker_lvPicker_Update() {
     GuiControl, Hide, lvPicker
     LV_Delete()
     Func("ObjCSV_Collection2Listview").call(objFiltered, Picker
-        , lvPicker, strFieldOrder := "HotString,Text,Category,Treated")
+        , lvPicker, strFieldOrder := "Trigger,Text,Category,Treated")
     LV_ModifyCol(1, AutoHDR)
     LV_ModifyCol(2, 1005)
     LV_ModifyCol(3, 0)
