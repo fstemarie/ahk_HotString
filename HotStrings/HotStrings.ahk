@@ -17,14 +17,20 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include *i <Picker>
 
 global version = 4
-global category
-global csvFile := Get_CsvFile()
 global objCSV
 global hsCache := {}
+global category
+global categories := ""
+global defaultCategory := ""
+
+global configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
+global config := Get_Config()
+; global csvFile := Get_CsvFile()
+; global stickyDefault := Get_StickyDefault()
+
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
-Random,, NewSeed
 Check_Updated() ; Checks to see if it's been updated to notify the user
 Notify_Updates() ; Checks to see if a new version is out
 Check_Dependencies() ; Checks for and download the dependencies
@@ -106,9 +112,11 @@ Check_Dependencies() {
         Reload
 }
 
-Get_CsvFile() {
-    OutputDebug, % "-- Get_csvFile()"
-    configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
+Get_Config() {
+    OutputDebug, % "-- Get_Config()"
+    conf := {}
+
+    ; CsvFile
     IniRead, csvFile, %configFile%, Configuration, CsvFile
     if (csvFile == "ERROR") {
         FileSelectFile, fsfValue, 3,, Choose your HotStrings CSV file
@@ -120,68 +128,81 @@ Get_CsvFile() {
             ExitApp, 1
         }
     }
-    return csvFile
+    conf.csvFile := csvFile
+
+    ; StickyDefault
+    IniRead, stickyDefault, %configFile%, Configuration, StickyDefault
+    if (stickyDefault == "ERROR") {
+        stickyDefault := True
+        IniWrite, %stickyDefault%, %configFile%, Configuration, StickyDefault
+    }
+    conf.stickyDefault := stickyDefault
+    return conf
 }
 
 Load_CSV() {
-    objCSV := Func("ObjCSV_CSV2Collection").call(csvFile
-        , "Trigger,Text,Category,Treated", False)
+    categories := ""
+    objCSV := Func("ObjCSV_CSV2Collection").call(config.csvFile
+    , "Trigger,Replacement,Category,Treated", False)
 
-    ; Remove rows that don't have the Text field filled
     i := objCSV.MaxIndex()
     while i >= objCSV.MinIndex() {
-        if (!objCSV[i].Text)
+        ; Remove rows that don't have the Text field filled
+        row := objCSV[i]
+        if (!row.Replacement) {
             objCSV.RemoveAt(i)
+            continue
+        }
+        ; Gather all the categories
+        categories .= row.Category . "|"
+
+        ; Find the default category if there is one
+        if (SubStr(row.Category, 1, 1) = "@")
+            defaultCategory := row.Category
+
+        ; Fill hsCache with all the hotstrings
+        if !hsCache.HasKey(row.Trigger)
+            hsCache[row.Trigger] := []
+        objHS := {Trigger: row.Trigger, Replacement: row.Replacement
+        , Treated: row.Treated}
+        hsCache[row.Trigger].Push(objHS)
         i--
     }
-
+    Sort, categories, U D|
+    categories := "*|" . categories
+    category := defaultCategory?defaultCategory:"*"
 }
 
 Create_HotStrings() {
     OutputDebug, % "-- Create_HotStrings()"
 
-    ; Sort the data based on the Trigger field
-    sortedCSV := ObjCSV_SortCollection(objCSV, "Trigger")
-
     ; Setup HotStrings
-    Loop, % sortedCSV.MaxIndex() {
-        lastRow := row.Clone()
-        row := sortedCSV[A_Index]
-        if (lastRow and row.Trigger = lastRow.Trigger) {
-            HotString("`:RX`:" . row.Trigger, "Send_RandomizedText")
-            if !hsCache.HasKey(row.Trigger)
-                hsCache[row.Trigger] := [lastRow.Text]
-            hsCache[row.Trigger].Push(row.Text)
-
-        } else {
-            if (row.Trigger) {
-                try {
-                    if (!row.Treated) {
-                        Hotstring("`:R`:" row.Trigger, row.Text)
-                    } else {
-                        HotString("`:`:" row.Trigger, row.Text)
-                    }
-                    OutputDebug, % "Added HotString: " row.Trigger
-                }
-                catch {
-                    MsgBox "The hotstring does not exist or it has no"
-                    . " variant for the current IfWin criteria."
-                }
-            }
-        }
+    For trigger, arrHS in hsCache {
+        objHS := arrHS[1]
+        Hotstring("`:X`:" objHS.Trigger, "Send_Replacement")
+        OutputDebug, % "Added HotString: " objHS.Trigger
     }
 }
 
-Send_RandomizedText() {
-    global hsCache
-
-    hs := SubStr(A_ThisHotkey, 4)
-    if hsCache.HasKey(hs) {
-        OutputDebug, % "hs = " . hs
-        OutputDebug, % "hsCache[hs].MinIndex() = " . hsCache[hs].MinIndex()
-        OutputDebug, % "hsCache[hs].MaxIndex() = " . hsCache[hs].MaxIndex()
-        Random, rndIndex, % hsCache[hs].MinIndex(), hsCache[hs].MaxIndex()
-        SendRaw, % hsCache[hs][rndIndex]
+Send_Replacement() {
+    trigger := SubStr(A_ThisHotkey, 4)
+    if hsCache.HasKey(trigger) {
+        arrHS := hsCache[trigger]
+        OutputDebug, % "Trigger = " . trigger
+        OutputDebug, % "arrHS.Count() = " . arrHS.Count()
+        if arrHS.Count() <= 0
+            Throw, "Must have at least one HotString in arrHS"
+        if arrHS.Count() = 1 {
+            objHS := arrHS[1]
+        } else if arrHS.Count() > 1 {
+            objHS := arrHS.Pop()
+            arrHS.InsertAt(1, objHS)
+        }
+        if objHS.Treated {
+            Send, % objHS.Replacement
+        } else {
+            SendRaw, % objHS.Replacement
+        }
     }
 }
 

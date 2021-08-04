@@ -15,10 +15,10 @@ Picker_Build() {
     Gui, +LabelPicker_On -Caption +AlwaysOnTop
     Gui, Font, s16, Cascadia Bold
     Gui, Margin, 10, 10
-    Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick  ;btnSubmit
+    Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick ;btnSubmit
     Gui, Add, ListView, xm ym w1140 r15 LV0x8 vlvPicker HwndhwndlvPicker
     GuiControl, +gPicker_lvPicker_OnEvent +Hdr, lvPicker
-    GuiControl, +AltSubmit -Multi +Border Report, lvPicker ;lvPicker
+    GuiControl, +AltSubmit -Multi +Grid +Border Report, lvPicker ;lvPicker
     PostMessage, 0x1047, 0, 1,, ahk_id %hwndlvPicker% ;LVM_SETHOVERTIME
     Gui, Add, ListBox, x+m ym w150 hp 0x100 vlbCategories
     GuiControl, +gPicker_lbCategories_OnEvent Sort, lbCategories ;lbCategories
@@ -30,7 +30,6 @@ Picker_Build() {
     Gui, Add, Button, x+m wp r1 gPicker_btnNote_OnClick, Notepad ;btnNote
     OnMessage(0x001C, "Picker_OnWMACTIVATEAPP") ;WM_ACTIVATEAPP
     Picker_lbCategories_Update()
-    Picker_lvPicker_Update()
 }
 
 Picker_OnEscape() {
@@ -69,7 +68,6 @@ Picker_btnSubmit_OnClick() {
 }
 
 Picker_lbCategories_OnEvent() {
-    global category
     if (A_GuiEvent = "Normal") {
         GuiControlGet, category,, lbCategories
         Picker_lvPicker_Update()
@@ -78,12 +76,6 @@ Picker_lbCategories_OnEvent() {
 
 Picker_lbCategories_Update() {
     ; Setup categories
-    categories := "*|"
-    Loop, % objCSV.MaxIndex() {
-        row := objCSV[A_Index]
-        categories := categories . "|" . row.Category
-    }
-    Sort, categories, U D|
     GuiControl, Text, lbCategories, %categories%
 }
 
@@ -91,8 +83,8 @@ Picker_lvPicker_OnEvent() {
     OutputDebug, % "-- Picker_lvPicker_OnEvent()"
     Gui, Picker:Default
     Gui, ListView, lvPicker
-    LV_GetText(cell, A_EventInfo, 2)
-    LV_GetText(treated, A_EventInfo, 4)
+    LV_GetText(cell, A_EventInfo, 3)
+    LV_GetText(treated, A_EventInfo, 1)
     if (A_GuiEvent == "Normal") {
         Gui, Picker:Hide
         if (!treated) {
@@ -101,12 +93,12 @@ Picker_lvPicker_OnEvent() {
             Send, %cell%
         }
     } else if (A_GuiEvent == "I") {
-        Critical, On
         GuiControl, Text, txtPicker, %cell%
     }
 }
 
 Picker_lvPicker_Update() {
+    Critical, On
     if (category and category != "*") {
         objFiltered := []
         Loop, % objCSV.MaxIndex() {
@@ -120,16 +112,16 @@ Picker_lvPicker_Update() {
     ; Fill the ListView
     Gui, Picker:Default
     Gui, ListView, lvPicker
-    GuiControl, Hide, lvPicker
+    GuiControl, -Redraw, lvPicker
     LV_Delete()
     Func("ObjCSV_Collection2Listview").call(objFiltered, Picker
-        , lvPicker, strFieldOrder := "Trigger,Text,Category,Treated")
-    LV_ModifyCol(1, AutoHDR)
-    LV_ModifyCol(2, 1005)
-    LV_ModifyCol(3, 0)
-    LV_ModifyCol(4, 0)
-    GuiControl, Show, lvPicker
+    , lvPicker, strFieldOrder := "Treated,Trigger,Replacement")
+    LV_ModifyCol(1, 0)
+    LV_ModifyCol(2, AutoHDR)
+    LV_ModifyCol(3, AutoHDR)
+    GuiControl, +Redraw, lvPicker
     LV_Modify(20, "+Focus +Select")
+    Critical, Off
 }
 
 Picker_btnReload_OnClick() {
@@ -151,7 +143,7 @@ Picker_btnEdit_OnClick() {
         if (editor == "ERROR") {
             Gui Picker:Hide
             FileSelectFile, fsfValue, 3, C:\Windows\notepad.exe
-                , Choose your CSV text editor, Text Editor (*.exe)
+            , Choose your CSV text editor, Text Editor (*.exe)
             if (fsfValue) {
                 IniWrite, %fsfValue%, %configFile%, Configuration, Editor
                 editor := fsfValue
@@ -173,7 +165,7 @@ Picker_btnDoc_OnClick() {
         if (doc == "ERROR") {
             Gui Picker:Hide
             FileSelectFile, fsfValue, 3, %A_MyDocuments%
-                , Choose your document, Document (*.*)
+            , Choose your document, Document (*.*)
             if (fsfValue) {
                 IniWrite, %fsfValue%, %configFile%, Configuration, Document
                 doc := fsfValue
@@ -193,6 +185,8 @@ Picker_btnNote_OnClick() {
 
 Picker_Show() {
     OutputDebug, % "-- Picker_Show()"
+
+    ; Places the GUI Window in the center of the screen
     static centers
     if !IsObject(centers) {
         Gui, Show, AutoSize Center
@@ -204,6 +198,15 @@ Picker_Show() {
     Gui, Picker:Show, % "x"guiLeft " y"guiTop
     GuiControl, Focus, lvPicker
     LV_Modify(1, "+Focus +Select")
+
+    ; Select the default category if there is one
+    if config.stickyDefault and defaultCategory {
+        Picker_SelectCategory(defaultCategory)
+    }
+     else {
+        Picker_SelectCategory(category)
+    }
+        Picker_lvPicker_Update()
 }
 
 Picker_GetMonitor() {
@@ -214,7 +217,7 @@ Picker_GetMonitor() {
     Loop % monCount {
         SysGet, mon, Monitor, %A_Index%
         if (mouseX >= monLeft && mouseX <= monRight
-                && mouseY >= monTop && mouseY <= monBottom) {
+        && mouseY >= monTop && mouseY <= monBottom) {
             mon := A_Index
             break
         }
@@ -234,4 +237,18 @@ Picker_FindCenters() {
         centers.Push({"guiLeft": guiLeft, "guiTop": guiTop})
     }
     return centers
+}
+
+Picker_SelectCategory(cat) {
+    OutputDebug, % "-- Picker_SelectCategory()"
+
+    Loop, Parse, categories, "|"
+    {
+        if (A_LoopField) = cat {
+            GuiControl, Choose, lbCategories, %A_Index%
+            category := cat
+            break
+        }
+    }
+    Picker_lvPicker_Update()
 }
