@@ -18,7 +18,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 
 global version = 4
 global objCSV
-global hsCache := {}
+global hsCache
 global category
 global categories := ""
 global defaultCategory := ""
@@ -31,8 +31,9 @@ global config := Get_Config()
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
-Check_Updated() ; Checks to see if it's been updated to notify the user
-Notify_Updates() ; Checks to see if a new version is out
+Notify_Updated() ; Checks to see if it's been updated to notify the user
+if Check_Updates()
+    Update_Script()
 Check_Dependencies() ; Checks for and download the dependencies
 Load_CSV() ; Loads the data from the CSV file
 Create_HotStrings() ; From the loaded data, create the hotstrings
@@ -44,17 +45,11 @@ return
 
 ; ----------------------------------------------------------------------------
 ;region Code unrelated to Gui
-Check_Updated() {
+Notify_Updated() {
+    OutputDebug, % "-- Notify_Updated()"
     if (FileExist(A_ScriptDir . "\updated.txt")) {
         FileDelete, %A_ScriptDir%\updated.txt
         TrayTip, Updates, The script has been updated
-    }
-}
-
-Notify_Updates() {
-    OutputDebug, % "-- Notify_Updates()"
-    if (Check_Updates()) {
-        Update_Script()
     }
 }
 
@@ -79,6 +74,9 @@ Check_Updates() {
 Update_Script() {
     OutputDebug, % "-- Update_Script()"
     url := "https://raw.githubusercontent.com/fstemarie/"
+    . "ahk_HotStrings/master/HotStrings/lib/Picker.ahk"
+    UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
+    url := "https://raw.githubusercontent.com/fstemarie/"
     . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%
     FileAppend, "", %A_ScriptDir% . "\updated.txt"
@@ -88,7 +86,7 @@ Update_Script() {
 Check_Dependencies() {
     OutputDebug, % "-- Check_Dependencies()"
     hasToReload := false
-    libDir := A_ScriptDir . "\Lib"
+    libDir := A_ScriptDir . "\lib"
     if (!FileExist(libDir))
         FileCreateDir, %libDir%
 
@@ -96,7 +94,7 @@ Check_Dependencies() {
     file := libDir . "\ObjCSV.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-        . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
+        . "JnLlnd/ObjCSV/master/lib/ObjCSV.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -104,7 +102,7 @@ Check_Dependencies() {
     file := libDir . "\Picker.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-        . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
+        . "fstemarie/ahk_HotStrings/master/HotStrings/lib/Picker.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -141,6 +139,7 @@ Get_Config() {
 }
 
 Load_CSV() {
+    hsCache := {}
     categories := ""
     objCSV := Func("ObjCSV_CSV2Collection").call(config.csvFile
     , "Trigger,Replacement,Category,Treated", False)
