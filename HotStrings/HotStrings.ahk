@@ -74,7 +74,7 @@ Check_Updates() {
 Update_Script() {
     OutputDebug, % "-- Update_Script()"
     url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/HotStrings/lib/Picker.ahk"
+    . "ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
     url := "https://raw.githubusercontent.com/fstemarie/"
     . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
@@ -94,7 +94,7 @@ Check_Dependencies() {
     file := libDir . "\ObjCSV.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-        . "JnLlnd/ObjCSV/master/lib/ObjCSV.ahk"
+        . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -102,7 +102,7 @@ Check_Dependencies() {
     file := libDir . "\Picker.ahk"
     if (!FileExist(file)) {
         url := "https://raw.githubusercontent.com/"
-        . "fstemarie/ahk_HotStrings/master/HotStrings/lib/Picker.ahk"
+        . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -139,6 +139,7 @@ Get_Config() {
 }
 
 Load_CSV() {
+    OutputDebug, % "-- Load_CSV()"
     hsCache := {}
     categories := ""
     objCSV := Func("ObjCSV_CSV2Collection").call(config.csvFile
@@ -149,7 +150,7 @@ Load_CSV() {
         ; Remove rows that don't have the Text field filled
         row := objCSV[i]
         if (!row.Replacement) {
-            objCSV.RemoveAt(i)
+            objCSV.RemoveAt(i--)
             continue
         }
         ; Gather all the categories
@@ -184,6 +185,7 @@ Create_HotStrings() {
 }
 
 Send_Replacement() {
+    OutputDebug, % "-- Send_Replacement()"
     trigger := SubStr(A_ThisHotkey, 4)
     if hsCache.HasKey(trigger) {
         arrHS := hsCache[trigger]
@@ -206,7 +208,7 @@ Send_Replacement() {
 }
 
 Fetch_Password() {
-    OutputDebug, % "-- Get_Password()"
+    OutputDebug, % "-- Fetch_Password()"
     static password
     if (password = "") {
         cmd := "KeePassCommand getfield Citrix Password"
