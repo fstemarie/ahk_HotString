@@ -16,7 +16,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include *i <ObjCSV>
 #include *i <Picker>
 
-global version = 4
+global version = 5
 global objCSV
 global hsCache
 global category
