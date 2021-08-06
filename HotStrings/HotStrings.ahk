@@ -42,7 +42,7 @@ return
 ;region Code unrelated to Gui
 Notify_Updated() {
     OutputDebug, % "-- Notify_Updated()"
-    if (FileExist(A_ScriptDir . "\updated.txt")) {
+    if FileExist(A_ScriptDir . "\updated.txt") {
         FileDelete, %A_ScriptDir%\updated.txt
         TrayTip, Updates, The script has been updated
     }
@@ -50,7 +50,7 @@ Notify_Updated() {
 
 Check_Updates() {
     OutputDebug, % "-- Check_Updates()"
-    static updatesAvailable = "New"
+    static updatesAvailable := "New"
 
     if (updatesAvailable = "New") {
         url := "https://raw.githubusercontent.com/"
@@ -84,12 +84,12 @@ Check_Dependencies() {
     OutputDebug, % "-- Check_Dependencies()"
     hasToReload := false
     libDir := A_ScriptDir . "\lib"
-    if (!FileExist(libDir))
+    if !FileExist(libDir)
         FileCreateDir, %libDir%
 
     ; ObjCSV.ahk
     file := libDir . "\ObjCSV.ahk"
-    if (!FileExist(file)) {
+    if !FileExist(file) {
         url := "https://raw.githubusercontent.com/"
         . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
         UrlDownloadToFile, %url%, %file%
@@ -97,7 +97,7 @@ Check_Dependencies() {
     }
     ; Picker.ahk
     file := libDir . "\Picker.ahk"
-    if (!FileExist(file)) {
+    if !FileExist(file) {
         url := "https://raw.githubusercontent.com/"
         . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
         UrlDownloadToFile, %url%, %file%
@@ -106,13 +106,13 @@ Check_Dependencies() {
 
     ; Configuration.ahk
     file := libDir . "\Configuration.ahk"
-    if (!FileExist(file)) {
+    if !FileExist(file) {
         url := "https://raw.githubusercontent.com/"
         . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Configuration.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
-    if (hasToReload)
+    if hasToReload
         Reload
 }
 
@@ -132,7 +132,7 @@ Load_CSV() {
     while i >= objCSV.MinIndex() {
         ; Remove rows that don't have the Text field filled
         row := objCSV[i]
-        if (!row.Replacement) {
+        if !row.Replacement {
             objCSV.RemoveAt(i--)
             continue
         }
@@ -140,7 +140,7 @@ Load_CSV() {
         categories .= row.Category . "|"
 
         ; Find the default category if there is one
-        if (SubStr(row.Category, 1, 1) = "@")
+        if SubStr(row.Category, 1, 1) = "@"
             config.defaultCategory := row.Category
 
         ; Fill hsCache with all the hotstrings
