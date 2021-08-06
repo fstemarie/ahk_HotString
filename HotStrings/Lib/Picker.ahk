@@ -12,7 +12,7 @@ if (A_ScriptName = "Picker.ahk")
 Picker_Build() {
     OutputDebug, % "-- Picker_Build()"
     Gui, Picker:New, +Owner +Border +HwndhwndPicker, PickerGui
-    Gui, +LabelPicker_On -Caption +AlwaysOnTop
+    Gui, +LabelPicker_On -Caption ; +AlwaysOnTop
     Gui, Font, s16, Cascadia Bold
     Gui, Margin, 10, 10
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick ;btnSubmit
@@ -23,11 +23,12 @@ Picker_Build() {
     Gui, Add, ListBox, x+m ym w150 hp 0x100 vlbCategories
     GuiControl, +gPicker_lbCategories_OnEvent Sort, lbCategories ;lbCategories
     Gui, Add, Text, vtxtPicker xm w1300 r10 Border
-    Gui, Add, Button, xm y+m w100 r1 gPicker_btnQuit_OnClick, &Quit ;btnReload
+    Gui, Add, Button, xm y+m w120 r1 gPicker_btnQuit_OnClick, &Quit ;btnReload
     Gui, Add, Button, x+m wp r1 gPicker_btnReload_OnClick, &Reload ;btnQuit
-    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, Edit &CSV ;btnEdit
+    Gui, Add, Button, x+m wp r1 gPicker_btnCsvEdit_OnClick, Edit &CSV ;btnCsvEdit
     Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Edit &Doc ;btnDoc
-    Gui, Add, Button, x+m wp r1 gPicker_btnNote_OnClick, &Notepad ;btnNote
+    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, &Text Editor ;btnEdit
+    Gui, Add, Button, x+m wp r1 gPicker_btnHelp_OnClick, &Help ;btnHelp
     OnMessage(0x001C, "Picker_OnWMACTIVATEAPP") ;WM_ACTIVATEAPP
     Picker_lbCategories_Update()
 }
@@ -135,19 +136,27 @@ Picker_btnQuit_OnClick() {
     ExitApp, 0
 }
 
-Picker_btnEdit_OnClick() {
-    OutputDebug, % "-- Picker_btnEdit_OnClick()"
-    Run, % config.editor . " " . config.csvFile
+Picker_btnCsvEdit_OnClick() {
+    OutputDebug, % "-- Picker_btnCsvEdit_OnClick()"
+    if config.csvEditor and config.csvFile
+        Run, % config.csvEditor . " " . config.csvFile
 }
 
 Picker_btnDoc_OnClick() {
     OutputDebug, % "-- Picker_btnDoc_OnClick()"
-    Run, % config.document
+    if config.document
+        Run, % config.document
 }
 
-Picker_btnNote_OnClick() {
-    OutputDebug, % "-- Picker_btnNote_OnClick()"
-    Run notepad.exe
+Picker_btnEdit_OnClick() {
+    OutputDebug, % "-- Picker_btnEdit_OnClick()"
+    if config.editor
+        Run, % config.editor
+}
+
+Picker_btnHelp_OnClick() {
+    OutputDebug, % "-- Picker_btnHelp_OnClick()"
+    Run, % "https://www.autohotkey.com/docs/KeyList.htm"
 }
 
 Picker_Show() {
@@ -169,8 +178,7 @@ Picker_Show() {
     ; Select the default category if there is one
     if config.stickyDefault and config.defaultCategory {
         Picker_SelectCategory(config.defaultCategory)
-    }
-    else {
+    } else {
         Picker_SelectCategory(category)
     }
     Picker_lvPicker_Update()
@@ -211,12 +219,4 @@ Picker_SelectCategory(cat) {
 
     GuiControl, Choose, lbCategories, %cat%
     category := cat
-    ; Loop, Parse, categories, "|"
-    ; {
-    ;     if (A_LoopField) = cat {
-    ;         GuiControl, Choose, lbCategories, %A_Index%
-    ;         category := cat
-    ;         break
-    ;     }
-    ; }
 }
