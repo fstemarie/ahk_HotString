@@ -218,13 +218,6 @@ F1::
 return
 #IfWinActive
 
-#IfWinActive, PickerGui
-#F1::
-    OutputDebug, % "HotKey WIN-F1 Pressed"
-    Run, GeekSquad.ods, D:\francois\Documents
-return
-#IfWinActive
-
 #IfWinActive, Virtual Desktop - Desktop Viewer
 :*:###::
     SendRaw % Fetch_Password()
