@@ -13,6 +13,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 ; LVS_EX_TRACKSELECT := 0x00000008
 ; WM_NOTIFY          := 0x004E
 ; WM_ACTIVATEAPP     := 0x001C
+#include *i <Configuration>
 #include *i <ObjCSV>
 #include *i <Picker>
 
@@ -20,14 +21,8 @@ global version = 5
 global objCSV
 global hsCache
 global category
-global categories := ""
-global defaultCategory := ""
-
-global configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
+global categories
 global config := Get_Config()
-; global csvFile := Get_CsvFile()
-; global stickyDefault := Get_StickyDefault()
-
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
@@ -55,7 +50,6 @@ Notify_Updated() {
 
 Check_Updates() {
     OutputDebug, % "-- Check_Updates()"
-    global version
     static updatesAvailable = "New"
 
     if (updatesAvailable = "New") {
@@ -73,6 +67,9 @@ Check_Updates() {
 
 Update_Script() {
     OutputDebug, % "-- Update_Script()"
+    url := "https://raw.githubusercontent.com/fstemarie/"
+    . "ahk_HotStrings/master/HotStrings/Lib/Configuration.ahk"
+    UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
     url := "https://raw.githubusercontent.com/fstemarie/"
     . "ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
@@ -106,36 +103,22 @@ Check_Dependencies() {
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
+
+    ; Configuration.ahk
+    file := libDir . "\Configuration.ahk"
+    if (!FileExist(file)) {
+        url := "https://raw.githubusercontent.com/"
+        . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Configuration.ahk"
+        UrlDownloadToFile, %url%, %file%
+        hasToReload := true
+    }
     if (hasToReload)
         Reload
 }
 
 Get_Config() {
     OutputDebug, % "-- Get_Config()"
-    conf := {}
-
-    ; CsvFile
-    IniRead, csvFile, %configFile%, Configuration, CsvFile
-    if (csvFile == "ERROR") {
-        FileSelectFile, fsfValue, 3,, Choose your HotStrings CSV file
-        , CSV File (*.csv)
-        if (fsfValue) {
-            IniWrite, %fsfValue%, %configFile%, Configuration, CsvFile
-            csvFile := fsfValue
-        } else {
-            ExitApp, 1
-        }
-    }
-    conf.csvFile := csvFile
-
-    ; StickyDefault
-    IniRead, stickyDefault, %configFile%, Configuration, StickyDefault
-    if (stickyDefault == "ERROR") {
-        stickyDefault := True
-        IniWrite, %stickyDefault%, %configFile%, Configuration, StickyDefault
-    }
-    conf.stickyDefault := stickyDefault
-    return conf
+    return new Configuration(SubStr(A_ScriptFullPath, 1, -4) . ".ini")
 }
 
 Load_CSV() {
@@ -158,7 +141,7 @@ Load_CSV() {
 
         ; Find the default category if there is one
         if (SubStr(row.Category, 1, 1) = "@")
-            defaultCategory := row.Category
+            config.defaultCategory := row.Category
 
         ; Fill hsCache with all the hotstrings
         if !hsCache.HasKey(row.Trigger)
@@ -170,7 +153,8 @@ Load_CSV() {
     }
     Sort, categories, U D|
     categories := "*|" . categories
-    category := defaultCategory?defaultCategory:"*"
+    config.defaultCategory := config.defaultCategory?config.defaultCategory
+    category := config.defaultCategory?config.defaultCategory:"*"
 }
 
 Create_HotStrings() {
@@ -180,7 +164,7 @@ Create_HotStrings() {
     For trigger, arrHS in hsCache {
         objHS := arrHS[1]
         Hotstring("`:X`:" objHS.Trigger, "Send_Replacement")
-        OutputDebug, % "Added HotString: " objHS.Trigger
+        OutputDebug, % A_Tab . "Added HotString: " objHS.Trigger
     }
 }
 
@@ -189,10 +173,8 @@ Send_Replacement() {
     trigger := SubStr(A_ThisHotkey, 4)
     if hsCache.HasKey(trigger) {
         arrHS := hsCache[trigger]
-        OutputDebug, % "Trigger = " . trigger
-        OutputDebug, % "arrHS.Count() = " . arrHS.Count()
-        if arrHS.Count() <= 0
-            Throw, "Must have at least one HotString in arrHS"
+        OutputDebug, % A_Tab . "Trigger = " . trigger
+        OutputDebug, % A_Tab . "arrHS.Count() = " . arrHS.Count()
         if arrHS.Count() = 1 {
             objHS := arrHS[1]
         } else if arrHS.Count() > 1 {

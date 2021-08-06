@@ -23,11 +23,11 @@ Picker_Build() {
     Gui, Add, ListBox, x+m ym w150 hp 0x100 vlbCategories
     GuiControl, +gPicker_lbCategories_OnEvent Sort, lbCategories ;lbCategories
     Gui, Add, Text, vtxtPicker xm w1300 r10 Border
-    Gui, Add, Button, xm y+m w100 r1 gPicker_btnQuit_OnClick, Quit ;btnReload
-    Gui, Add, Button, x+m wp r1 gPicker_btnReload_OnClick, Reload ;btnQuit
-    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, Edit CSV ;btnEdit
-    Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Edit Doc ;btnDoc
-    Gui, Add, Button, x+m wp r1 gPicker_btnNote_OnClick, Notepad ;btnNote
+    Gui, Add, Button, xm y+m w100 r1 gPicker_btnQuit_OnClick, &Quit ;btnReload
+    Gui, Add, Button, x+m wp r1 gPicker_btnReload_OnClick, &Reload ;btnQuit
+    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, Edit &CSV ;btnEdit
+    Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Edit &Doc ;btnDoc
+    Gui, Add, Button, x+m wp r1 gPicker_btnNote_OnClick, &Notepad ;btnNote
     OnMessage(0x001C, "Picker_OnWMACTIVATEAPP") ;WM_ACTIVATEAPP
     Picker_lbCategories_Update()
 }
@@ -52,15 +52,16 @@ Picker_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
 
 Picker_btnSubmit_OnClick() {
     OutputDebug, % "-- Picker_btnSubmit_OnClick()"
-    Gui, Picker:Default
-    Gui, ListView, lvPicker
-    row := LV_GetNext(0)
-    if (row > 0) {
+    GuiControlGet, focused, Picker:FocusV
+    if ("lvPicker" = focused) {
+        Gui, Picker:Default
+        Gui, ListView, lvPicker
+        row := LV_GetNext(1, F)
+        LV_GetText(treated, row, 1)
+        LV_GetText(cell, row, 3)
         Gui, Picker:Hide
-        LV_GetText(cell, row, 2)
-        LV_GetText(treated, row, 4)
         if (!treated) {
-            SendRaw, %cells%
+            SendRaw, %cell%
         } else {
             Send, %cell%
         }
@@ -136,46 +137,12 @@ Picker_btnQuit_OnClick() {
 
 Picker_btnEdit_OnClick() {
     OutputDebug, % "-- Picker_btnEdit_OnClick()"
-    static editor := false
-    if (!editor) {
-        configFile := SubStr(A_ScriptFullPath, 1, -4) . ".ini"
-        IniRead, editor, %configFile%, Configuration, Editor
-        if (editor == "ERROR") {
-            Gui Picker:Hide
-            FileSelectFile, fsfValue, 3, C:\Windows\notepad.exe
-            , Choose your CSV text editor, Text Editor (*.exe)
-            if (fsfValue) {
-                IniWrite, %fsfValue%, %configFile%, Configuration, Editor
-                editor := fsfValue
-            } else {
-                editor := false
-                return
-            }
-        }
-    }
-    Run %editor% %csvFile%
+    Run, % config.editor . " " . config.csvFile
 }
 
 Picker_btnDoc_OnClick() {
     OutputDebug, % "-- Picker_btnDoc_OnClick()"
-    static doc
-    if (!doc) {
-        configFile := (SubStr(A_ScriptFullPath, 1, -4) . ".ini")
-        IniRead, doc, %configFile%, Configuration, Document
-        if (doc == "ERROR") {
-            Gui Picker:Hide
-            FileSelectFile, fsfValue, 3, %A_MyDocuments%
-            , Choose your document, Document (*.*)
-            if (fsfValue) {
-                IniWrite, %fsfValue%, %configFile%, Configuration, Document
-                doc := fsfValue
-            } else {
-                doc := false
-                return
-            }
-        }
-    }
-    Run, %doc%
+    Run, % config.document
 }
 
 Picker_btnNote_OnClick() {
@@ -200,13 +167,13 @@ Picker_Show() {
     LV_Modify(1, "+Focus +Select")
 
     ; Select the default category if there is one
-    if config.stickyDefault and defaultCategory {
-        Picker_SelectCategory(defaultCategory)
+    if config.stickyDefault and config.defaultCategory {
+        Picker_SelectCategory(config.defaultCategory)
     }
-     else {
+    else {
         Picker_SelectCategory(category)
     }
-        Picker_lvPicker_Update()
+    Picker_lvPicker_Update()
 }
 
 Picker_GetMonitor() {
@@ -242,13 +209,14 @@ Picker_FindCenters() {
 Picker_SelectCategory(cat) {
     OutputDebug, % "-- Picker_SelectCategory()"
 
-    Loop, Parse, categories, "|"
-    {
-        if (A_LoopField) = cat {
-            GuiControl, Choose, lbCategories, %A_Index%
-            category := cat
-            break
-        }
-    }
-    Picker_lvPicker_Update()
+    GuiControl, Choose, lbCategories, %cat%
+    category := cat
+    ; Loop, Parse, categories, "|"
+    ; {
+    ;     if (A_LoopField) = cat {
+    ;         GuiControl, Choose, lbCategories, %A_Index%
+    ;         category := cat
+    ;         break
+    ;     }
+    ; }
 }
