@@ -3,20 +3,22 @@
 ; Picker Gui Code
 global lvPicker
 global txtPicker
-global hwndPicker
+global pickerHwnd
+global lvPickerHwnd
 global lbCategories
+global centers
 
 if (A_ScriptName = "Picker.ahk")
     ExitApp 1
 
 Picker_Build() {
     OutputDebug, % "-- Picker_Build()"
-    Gui, Picker:New, +Owner +Border +HwndhwndPicker, PickerGui
+    Gui, Picker:New, +Owner +Border +HwndpickerHwnd, PickerGui
     Gui, +LabelPicker_On -Caption ; +AlwaysOnTop
     Gui, Font, s16, Cascadia Bold
     Gui, Margin, 10, 10
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick ;btnSubmit
-    Gui, Add, ListView, xm ym w1140 r15 LV0x8 vlvPicker HwndhwndlvPicker
+    Gui, Add, ListView, xm ym w1140 r15 LV0x8 vlvPicker HwndlvPickerHwnd
     GuiControl, +gPicker_lvPicker_OnEvent +Hdr, lvPicker
     GuiControl, +AltSubmit -Multi +Grid +Border Report, lvPicker ;lvPicker
     PostMessage, 0x1047, 0, 1,, ahk_id %hwndlvPicker% ;LVM_SETHOVERTIME
@@ -38,8 +40,11 @@ Picker_OnEscape() {
     Gui Picker:Hide
 }
 
+Picker_OnSize() {
+}
+
 Picker_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
-    if (hwnd = hwndPicker) {
+    if (hwnd = pickerHwnd) {
         OutputDebug, % "-- Picker_OnWMACTIVATEAPP()"
         if (!wParam) {
             OutputDebug, % A_Tab . "Window Deactivated"
@@ -70,6 +75,7 @@ Picker_btnSubmit_OnClick() {
 }
 
 Picker_lbCategories_OnEvent() {
+    OutputDebug, % "-- Picker_lbCategories_OnEvent()"
     if (A_GuiEvent = "Normal") {
         GuiControlGet, category,, lbCategories
         Picker_lvPicker_Update()
@@ -77,6 +83,7 @@ Picker_lbCategories_OnEvent() {
 }
 
 Picker_lbCategories_Update() {
+    OutputDebug, % "-- Picker_lbCategories_Update()"
     ; Setup categories
     GuiControl, Text, lbCategories, %categories%
 }
@@ -100,7 +107,9 @@ Picker_lvPicker_OnEvent() {
 }
 
 Picker_lvPicker_Update() {
+    OutputDebug, % "-- Picker_lvPicker_Update()"
     Critical, On
+    ; Filter the Data
     if (category and category != "*") {
         objFiltered := []
         Loop, % objCSV.MaxIndex() {
@@ -113,16 +122,21 @@ Picker_lvPicker_Update() {
 
     ; Fill the ListView
     Gui, Picker:Default
-    Gui, ListView, lvPicker
+    Gui, Picker:ListView, lvPicker
     GuiControl, -Redraw, lvPicker
     LV_Delete()
     Func("ObjCSV_Collection2Listview").call(objFiltered, Picker
     , lvPicker, strFieldOrder := "Treated,Trigger,Replacement")
+
+    ;Resize the columns
     LV_ModifyCol(1, 0)
-    LV_ModifyCol(2, AutoHDR)
-    LV_ModifyCol(3, AutoHDR)
+    LV_ModifyCol(2, AutoHdr)
+    SendMessage, 0x1000+29, 1, 0,, ahk_id %lvPickerHwnd%
+    colW := ErrorLevel
+    GuiControlGet, pos, Pos, lvPicker
+    LV_ModifyCol(3, (posW - colW - 4))
     GuiControl, +Redraw, lvPicker
-    LV_Modify(20, "+Focus +Select")
+    LV_Modify(1, "+Focus +Select")
     Critical, Off
 }
 
@@ -164,8 +178,8 @@ Picker_Show() {
 
     ; Places the GUI Window in the center of the screen
     static centers
-    if !IsObject(centers) {
-        Gui, Show, AutoSize Center
+    if !centers {
+        Gui, Picker:Show, AutoSize Center
         centers := Picker_FindCenters()
     }
     mon := Picker_GetMonitor()
@@ -177,10 +191,9 @@ Picker_Show() {
 
     ; Select the default category if there is one
     if config.stickyDefault and config.defaultCategory {
-        Picker_SelectCategory(config.defaultCategory)
-    } else {
-        Picker_SelectCategory(category)
+        category := config.defaultCategory
     }
+    GuiControl, Picker:Choose, lbCategories, %category%
     Picker_lvPicker_Update()
 }
 
@@ -203,7 +216,7 @@ Picker_GetMonitor() {
 Picker_FindCenters() {
     OutputDebug, % "-- Picker_FindCenters()"
     centers := []
-    WinGetPos,,, guiWidth, guiHeight, ahk_id %hwndPicker%
+    WinGetPos,,, guiWidth, guiHeight, ahk_id %pickerHwnd%
     SysGet, monCount, MonitorCount
     Loop % monCount {
         SysGet, mon, Monitor, %A_Index%
@@ -212,11 +225,4 @@ Picker_FindCenters() {
         centers.Push({"guiLeft": guiLeft, "guiTop": guiTop})
     }
     return centers
-}
-
-Picker_SelectCategory(cat) {
-    OutputDebug, % "-- Picker_SelectCategory()"
-
-    GuiControl, Choose, lbCategories, %cat%
-    category := cat
 }
