@@ -212,9 +212,7 @@ return
 ; #IfWinNotActive, ahk_exe Code.exe
 F1::
     OutputDebug, % "HotKey F1 Pressed"
-    Loop 2 {
-        Func("Picker_Show").call()
-    }
+    Func("Picker_Show").call()
 return
 #IfWinActive
 
