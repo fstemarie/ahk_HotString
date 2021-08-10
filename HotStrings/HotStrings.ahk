@@ -118,7 +118,10 @@ Check_Dependencies() {
 
 Get_Config() {
     OutputDebug, % "-- Get_Config()"
-    return new Configuration(SubStr(A_ScriptFullPath, 1, -4) . ".ini")
+    configFile := SubStr(A_ScriptFullPath, 1, -4) . ".ini"
+    if !FileExist(configFile)
+        FileAppend,, %configFile%
+    return new Configuration(configFile)
 }
 
 Load_CSV() {
