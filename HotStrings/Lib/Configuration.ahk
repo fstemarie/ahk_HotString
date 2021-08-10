@@ -4,11 +4,10 @@ SetWorkingDir, %A_ScriptDir%
 
 Class Configuration {
     __New(configFile) {
-        if FileExist(configFile) {
-            this._configFile := configFile
-        } else {
-            throw "INI File must exist"
+        if !FileExist(configFile) {
+            throw "INI File not found"
         }
+        this._configFile := configFile
     }
 
     csvFile {
