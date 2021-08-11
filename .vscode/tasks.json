@@ -7,7 +7,7 @@
             "command": "rclone",
             "args": [
                 "sync",
-                "HotStrings",
+                "src",
                 "hotstrings:",
                 "--exclude",
                 "HotStrings.ini",
@@ -27,7 +27,7 @@
             "command": "rclone",
             "args": [
                 "sync",
-                "HotStrings",
+                "src",
                 "D:/applications/HotStrings",
                 "--exclude",
                 "HotStrings.ini",

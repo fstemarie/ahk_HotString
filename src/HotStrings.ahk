@@ -68,13 +68,13 @@ Check_Updates() {
 Update_Script() {
     OutputDebug, % "-- Update_Script()"
     url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/HotStrings/Lib/Configuration.ahk"
+    . "ahk_HotStrings/master/src/lib/Configuration.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
     url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
+    . "ahk_HotStrings/master/src/lib/Picker.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
     url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/HotStrings/HotStrings.ahk"
+    . "ahk_HotStrings/master/src/HotStrings.ahk"
     UrlDownloadToFile, %url%, %A_ScriptFullPath%
     FileAppend, "", %A_ScriptDir% . "\updated.txt"
     Reload
@@ -91,7 +91,7 @@ Check_Dependencies() {
     file := libDir . "\ObjCSV.ahk"
     if !FileExist(file) {
         url := "https://raw.githubusercontent.com/"
-        . "JnLlnd/ObjCSV/master/Lib/ObjCSV.ahk"
+        . "JnLlnd/ObjCSV/master/lib/ObjCSV.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -99,7 +99,7 @@ Check_Dependencies() {
     file := libDir . "\Picker.ahk"
     if !FileExist(file) {
         url := "https://raw.githubusercontent.com/"
-        . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Picker.ahk"
+        . "fstemarie/ahk_HotStrings/master/src/lib/Picker.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
@@ -108,7 +108,7 @@ Check_Dependencies() {
     file := libDir . "\Configuration.ahk"
     if !FileExist(file) {
         url := "https://raw.githubusercontent.com/"
-        . "fstemarie/ahk_HotStrings/master/HotStrings/Lib/Configuration.ahk"
+        . "fstemarie/ahk_HotStrings/master/src/lib/Configuration.ahk"
         UrlDownloadToFile, %url%, %file%
         hasToReload := true
     }
