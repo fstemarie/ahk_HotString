@@ -21,7 +21,7 @@ Picker_Build() {
     Gui, Add, ListView, xm ym w1140 r15 LV0x8 vlvPicker HwndlvPickerHwnd
     GuiControl, +gPicker_lvPicker_OnEvent +Hdr, lvPicker
     GuiControl, +AltSubmit -Multi +Grid +Border Report, lvPicker ;lvPicker
-    PostMessage, 0x1047, 0, 1,, ahk_id %hwndlvPicker% ;LVM_SETHOVERTIME
+    PostMessage, 0x1047, 0, 1,, ahk_id %lvPickerHwnd% ;LVM_SETHOVERTIME
     Gui, Add, ListBox, x+m ym w150 hp 0x100 vlbCategories
     GuiControl, +gPicker_lbCategories_OnEvent Sort, lbCategories ;lbCategories
     Gui, Add, Text, vtxtPicker xm w1300 r10 Border
