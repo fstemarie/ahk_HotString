@@ -196,7 +196,8 @@ Fetch_Password() {
     OutputDebug, % "-- Fetch_Password()"
     static password
     if (password = "") {
-        cmd := "KeePassCommand getfield Citrix Password"
+        cmd := "D:\applications\KeePassCommander\"
+        + "KeePassCommand getfield Citrix Password"
         out := ComObjCreate("WScript.Shell")
         .Exec(A_ComSpec . " /q /c " . cmd).StdOut.ReadAll()
         out := StrSplit(out, "`r`n")[4]
