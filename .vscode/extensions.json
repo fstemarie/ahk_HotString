@@ -1,5 +1,6 @@
 {
     "recommendations": [
-        "mark-wiemer.vscode-autohotkey-plus-plus"
+        "mark-wiemer.vscode-autohotkey-plus-plus",
+        "zero-plusplus.vscode-autohotkey-debug"
     ]
 }
