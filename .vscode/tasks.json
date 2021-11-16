@@ -2,6 +2,23 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "Build executable",
+            "type": "process",
+            "command": "C:/Program Files/AutoHotkey/Compiler/Ahk2Exe.exe",
+            "args": [
+                "/in", "${workspaceFolder}/src/HotStrings.ahk",
+                "/out", "${workspaceFolder}/dist/HotStrings.exe"
+            ],
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            }
+        },
+        {
             "label": "Deploy to OneDrive",
             "type": "process",
             "command": "rclone",
@@ -10,7 +27,7 @@
                 "src",
                 "hotstrings:",
                 "--exclude",
-                "HotStrings.ini",
+                "HotStrings.ini"
             ],
             "presentation": {
                 "reveal": "silent"
@@ -30,7 +47,7 @@
                 "src",
                 "D:/applications/HotStrings",
                 "--exclude",
-                "HotStrings.ini",
+                "HotStrings.ini"
             ],
             "presentation": {
                 "reveal": "silent"
