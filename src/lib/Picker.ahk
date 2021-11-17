@@ -1,67 +1,90 @@
 
 ; ----------------------------------------------------------------------------
-; Picker Gui Code
-global lvPicker
-global txtPicker
-global pickerHwnd
-global lvPickerHwnd
-global lbCategories
-global centers
 
-if (A_ScriptName = "Picker.ahk")
-    ExitApp 1
+#include <AnimateWindow>
+
+global PICKER_LVPICKER
+, PICKER_HWND
+, PICKER_TXTPICKER
+, PICKER_LVPICKER_HWND
+, PICKER_LBCATEGORIES
+, PICKER_WIDTH := 1024
+, PICKER_HEIGHT := 568
+, PICKER_MARGINX := 10
+, PICKER_MARGINY := 10
+, WM_ACTIVATEAPP := 0x001C
+, LVM_SETHOVERTIME := 0x1047
+, LVS_EX_HEADERDRAGDROP := 0x10
+, LVS_EX_TRACKSELECT := 0x8
 
 Picker_Build() {
-    OutputDebug, % "-- Picker_Build()"
-    Gui, Picker:New, +Owner +Border +HwndpickerHwnd, PickerGui
-    Gui, +LabelPicker_On -Caption ; +AlwaysOnTop
-    Gui, Font, s16, Cascadia Bold
-    Gui, Margin, 10, 10
-    Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick ;btnSubmit
-    Gui, Add, ListView, xm ym w1140 r15 LV0x8 vlvPicker HwndlvPickerHwnd
-    GuiControl, +gPicker_lvPicker_OnEvent +Hdr, lvPicker
-    GuiControl, +AltSubmit -Multi +Grid +Border Report, lvPicker ;lvPicker
-    PostMessage, 0x1047, 0, 1,, ahk_id %lvPickerHwnd% ;LVM_SETHOVERTIME
-    Gui, Add, ListBox, x+m ym w150 hp 0x100 vlbCategories
-    GuiControl, +gPicker_lbCategories_OnEvent Sort, lbCategories ;lbCategories
-    Gui, Add, Text, vtxtPicker xm w1300 r10 Border
-    Gui, Add, Button, xm y+m w120 r1 gPicker_btnQuit_OnClick, &Quit ;btnReload
-    Gui, Add, Button, x+m wp r1 gPicker_btnReload_OnClick, &Reload ;btnQuit
-    Gui, Add, Button, x+m wp r1 gPicker_btnCsvEdit_OnClick, Edit &CSV ;btnCsvEdit
-    Gui, Add, Button, x+m wp r1 gPicker_btnDoc_OnClick, Edit &Doc ;btnDoc
-    Gui, Add, Button, x+m wp r1 gPicker_btnEdit_OnClick, &Text Editor ;btnEdit
-    Gui, Add, Button, x+m wp r1 gPicker_btnHelp_OnClick, &Help ;btnHelp
-    OnMessage(0x001C, "Picker_OnWMACTIVATEAPP") ;WM_ACTIVATEAPP
+    OutputDebug, % "-- Picker_Build() `n"
+
+    global PICKER_WIDTH := 1024
+    ,PICKER_HEIGHT := 568
+
+    Gui, Picker:New, +Owner -Border +HwndPICKER_HWND
+    +LabelPicker_On -Caption +AlwaysOnTop
+    ; Gui, Color, 907FA4, A58FAA
+    Gui, Color, 363062, D8B9C3
+    Gui, Font, s16, Bold
+    Gui, Margin, %PICKER_MARGINX%, %PICKER_MARGINY%
+    Gui, Add, Button, x0 y0 Hidden Default gPicker_btnSubmit_OnClick
+
+    Gui, Add, ListView, xm ym w1000 h412 +Hdr +AltSubmit -Multi +Grid
+    +Border +Report +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND
+    +gPicker_lvPicker_OnEvent +NoSort +NoSortHdr
+    +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP%
+    PostMessage, %LVM_SETHOVERTIME%, 0, 1,, ahk_id %PICKER_LVPICKER_HWND%
+    LV_InsertCol(1, 0, "Treated")
+    LV_InsertCol(2, 150, "Trigger")
+    LV_InsertCol(3, 746, "Replacement")
+    Gui, Add, Text, xm y+m w1000 h130 +vPICKER_TXTPICKER +cWhite +Border
+
+    Gui, Add, ListBox, x+m ym w150 h330 0x100 +vPICKER_LBCATEGORIES
+    +gPicker_lbCategories_OnEvent Sort
+    Gui, Add, Button, xp y+5 wp h40 gPicker_btnCsvEdit_OnClick, Edit &CSV
+    Gui, Add, Button, xp y+5 wp hp gPicker_btnDoc_OnClick, Edit &Doc
+    Gui, Add, Button, xp y+5 wp hp gPicker_btnEdit_OnClick, &Text Editor
+    Gui, Add, Button, xp y+5 wp hp gPicker_btnReload_OnClick, &Reload
+    Gui, Add, Button, xp y+5 wp hp gPicker_btnQuit_OnClick, &Quit
+
+
+    OnMessage(WM_ACTIVATEAPP, "Picker_OnWMACTIVATEAPP")
+
     Picker_lbCategories_Update()
+    Picker_lvPicker_Update()
 }
 
 Picker_OnEscape() {
-    OutputDebug, % "-- Picker_OnEscape()"
-    Gui Picker:Hide
+    OutputDebug, % "-- Picker_OnEscape() `n"
+    AnimateWindow(PICKER_HWND, 125, AW_HIDE + AW_BLEND)
 }
 
 Picker_OnSize() {
+    ; OutputDebug, % "-- Picker_OnSize() `n"
+    ; msgbox % A_GuiWidth . "`n" . A_GuiHeight
 }
 
 Picker_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
-    if (hwnd = pickerHwnd) {
-        OutputDebug, % "-- Picker_OnWMACTIVATEAPP()"
+    if (hwnd = PICKER_HWND) {
+        OutputDebug, % "-- Picker_OnWMACTIVATEAPP() `n"
         if (!wParam) {
-            OutputDebug, % A_Tab . "Window Deactivated"
+            OutputDebug, % A_Tab . "Window Deactivated `n"
             Gui, Picker:Hide
             return 0
         } else {
-            OutputDebug, % A_Tab . "Window Activated"
+            OutputDebug, % A_Tab . "Window Activated `n"
         }
     }
 }
 
 Picker_btnSubmit_OnClick() {
-    OutputDebug, % "-- Picker_btnSubmit_OnClick()"
+    OutputDebug, % "-- Picker_btnSubmit_OnClick() `n"
     GuiControlGet, focused, Picker:FocusV
-    if ("lvPicker" = focused) {
+    if ("PICKER_LVPICKER" = focused) {
         Gui, Picker:Default
-        Gui, ListView, lvPicker
+        Gui, ListView, PICKER_LVPICKER
         row := LV_GetNext(1, F)
         LV_GetText(treated, row, 1)
         LV_GetText(cell, row, 3)
@@ -75,23 +98,22 @@ Picker_btnSubmit_OnClick() {
 }
 
 Picker_lbCategories_OnEvent() {
-    OutputDebug, % "-- Picker_lbCategories_OnEvent()"
+    OutputDebug, % "-- Picker_lbCategories_OnEvent() `n"
     if (A_GuiEvent = "Normal") {
-        GuiControlGet, category,, lbCategories
+        GuiControlGet, category,, PICKER_LBCATEGORIES
         Picker_lvPicker_Update()
     }
 }
 
 Picker_lbCategories_Update() {
-    OutputDebug, % "-- Picker_lbCategories_Update()"
-    ; Setup categories
-    GuiControl, Text, lbCategories, %categories%
+    OutputDebug, % "-- Picker_lbCategories_Update() `n"
+    GuiControl, Text, PICKER_LBCATEGORIES, %categories%
 }
 
 Picker_lvPicker_OnEvent() {
-    OutputDebug, % "-- Picker_lvPicker_OnEvent()"
+    OutputDebug, % "-- Picker_lvPicker_OnEvent() `n"
     Gui, Picker:Default
-    Gui, ListView, lvPicker
+    Gui, ListView, PICKER_LVPICKER
     LV_GetText(cell, A_EventInfo, 3)
     LV_GetText(treated, A_EventInfo, 1)
     if (A_GuiEvent == "Normal") {
@@ -102,103 +124,90 @@ Picker_lvPicker_OnEvent() {
             Send, %cell%
         }
     } else if (A_GuiEvent == "I") {
-        GuiControl, Text, txtPicker, %cell%
+        GuiControl, Text, PICKER_TXTPICKER, %cell%
     }
 }
 
 Picker_lvPicker_Update() {
-    OutputDebug, % "-- Picker_lvPicker_Update()"
-    Critical, On
+    OutputDebug, % "-- Picker_lvPicker_Update() `n"
     ; Filter the Data
-    if (category and category != "*") {
-        objFiltered := []
-        Loop, % objCSV.MaxIndex() {
-            if (objCSV[A_Index].Category = category)
-                objFiltered.Push(objCSV[A_Index])
-        }
-    } else {
-        objFiltered := objCSV
-    }
 
-    ; Fill the ListView
     Gui, Picker:Default
-    Gui, Picker:ListView, lvPicker
-    GuiControl, -Redraw, lvPicker
+    Gui, ListView, PICKER_LVPICKER
+    GuiControl, -Redraw, PICKER_LVPICKER
     LV_Delete()
-    Func("ObjCSV_Collection2Listview").call(objFiltered, Picker
-    , lvPicker, strFieldOrder := "Treated,Trigger,Replacement")
-
-    ;Resize the columns
-    LV_ModifyCol(1, 0)
-    LV_ModifyCol(2, AutoHdr)
-    SendMessage, 0x1000+29, 1, 0,, ahk_id %lvPickerHwnd%
-    colW := ErrorLevel
-    GuiControlGet, pos, Pos, lvPicker
-    LV_ModifyCol(3, (posW - colW - 4))
-    GuiControl, +Redraw, lvPicker
-    LV_Modify(1, "+Focus +Select")
+    ; Fill the ListView
+    Critical, On
+    loop, % objCSV.MaxIndex()
+    {
+        row := objCSV[A_Index]
+        filtered := false
+        if (category and category != "*" and row.Category != category)
+            filtered := true
+        if (!filtered)
+            LV_Add("", row["Treated"], row["Trigger"], row["Replacement"])
+    }
+    GuiControl, +Redraw, PICKER_LVPICKER
     Critical, Off
 }
 
 Picker_btnReload_OnClick() {
-    OutputDebug, % "-- Picker_btnReload_OnClick()"
+    OutputDebug, % "-- Picker_btnReload_OnClick() `n"
     Reload
 }
 
 Picker_btnQuit_OnClick() {
-    OutputDebug, % "-- Picker_btnQuit_OnClick()"
+    OutputDebug, % "-- Picker_btnQuit_OnClick() `n"
     ExitApp, 0
 }
 
 Picker_btnCsvEdit_OnClick() {
-    OutputDebug, % "-- Picker_btnCsvEdit_OnClick()"
+    OutputDebug, % "-- Picker_btnCsvEdit_OnClick() `n"
     if config.csvEditor and config.csvFile
         Run, % config.csvEditor . " " . config.csvFile
 }
 
 Picker_btnDoc_OnClick() {
-    OutputDebug, % "-- Picker_btnDoc_OnClick()"
+    OutputDebug, % "-- Picker_btnDoc_OnClick() `n"
     if config.document
         Run, % config.document
 }
 
 Picker_btnEdit_OnClick() {
-    OutputDebug, % "-- Picker_btnEdit_OnClick()"
+    OutputDebug, % "-- Picker_btnEdit_OnClick() `n"
     if config.editor
         Run, % config.editor
 }
 
 Picker_btnHelp_OnClick() {
-    OutputDebug, % "-- Picker_btnHelp_OnClick()"
+    OutputDebug, % "-- Picker_btnHelp_OnClick() `n"
     Run, % "https://www.autohotkey.com/docs/KeyList.htm"
 }
 
 Picker_Show() {
-    OutputDebug, % "-- Picker_Show()"
+    OutputDebug, % "-- Picker_Show() `n"
+    static centers
+
+    ; Select the default category if there is one
+    if config.stickyDefault and config.defaultCategory
+        category := config.defaultCategory
+    Picker_lvPicker_Update()
+    GuiControl, Choose, PICKER_LBCATEGORIES, %category%
+    LV_Modify(1, "+Focus +Select")
+    GuiControl, Focus, PICKER_LVPICKER
 
     ; Places the GUI Window in the center of the screen
-    static centers
-    if !centers {
-        Gui, Picker:Show, AutoSize Center
+    if (!centers)
         centers := Picker_FindCenters()
-    }
     mon := Picker_GetMonitor()
     guiLeft := centers[mon].guiLeft
     guiTop := centers[mon].guiTop
-    Gui, Picker:Show, % "x"guiLeft " y"guiTop
-    GuiControl, Focus, lvPicker
-    LV_Modify(1, "+Focus +Select")
-
-    ; Select the default category if there is one
-    if config.stickyDefault and config.defaultCategory {
-        category := config.defaultCategory
-    }
-    GuiControl, Picker:Choose, lbCategories, %category%
-    Picker_lvPicker_Update()
+    Gui, Picker:Show, % "x"guiLeft " y"guiTop " hide"
+    AnimateWindow(PICKER_HWND, 125, AW_ACTIVATE + AW_BLEND)
 }
 
 Picker_GetMonitor() {
-    OutputDebug, % "-- Picker_GetMonitor()"
+    OutputDebug, % "-- Picker_GetMonitor() `n"
     CoordMode, Mouse, Screen
     MouseGetPos, mouseX, mouseY
     SysGet, monCount, MonitorCount
@@ -214,14 +223,14 @@ Picker_GetMonitor() {
 }
 
 Picker_FindCenters() {
-    OutputDebug, % "-- Picker_FindCenters()"
+    OutputDebug, % "-- Picker_FindCenters() `n"
+    global PICKER_WIDTH, PICKER_HEIGHT
     centers := []
-    WinGetPos,,, guiWidth, guiHeight, ahk_id %pickerHwnd%
     SysGet, monCount, MonitorCount
     Loop % monCount {
         SysGet, mon, Monitor, %A_Index%
-        guiLeft := Ceil(monLeft + (monRight - monLeft - guiWidth) / 2)
-        guiTop := Ceil(monTop + (monBottom - monTop - guiHeight) / 2)
+        guiLeft := Ceil(monLeft + (monRight - monLeft - PICKER_WIDTH) / 2)
+        guiTop := Ceil(monTop + (monBottom - monTop - PICKER_HEIGHT) / 2)
         centers.Push({"guiLeft": guiLeft, "guiTop": guiTop})
     }
     return centers
