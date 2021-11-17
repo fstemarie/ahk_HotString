@@ -1,7 +1,3 @@
-#SingleInstance, Force
-SendMode Input
-SetWorkingDir, %A_ScriptDir%
-
 Class Configuration {
     __New(configFile) {
         if !FileExist(configFile) {
