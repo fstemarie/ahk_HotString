@@ -1,4 +1,4 @@
-﻿; Ahk2Exe-AddResource ../assets/Hblue.ico, 160   ; Replaces 'H on blue'
+﻿; Ahk2Exe-AddResource ../assets/Hgreen.ico, 160  ; Replaces 'H on green'
 ; Ahk2Exe-AddResource ../assets/Sgreen.ico, 206  ; Replaces 'S on green'
 ; Ahk2Exe-AddResource ../assets/Hred.ico, 207    ; Replaces 'H on red'
 ; Ahk2Exe-AddResource ../assets/Sred.ico, 208    ; Replaces 'S on red'
@@ -16,6 +16,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include <ObjCSV>
 #include <Configuration>
 #include <Picker>
+#include *i <Corrections>
 #include *i <Password>
 
 global version = 6
@@ -159,15 +160,9 @@ return
 ; ----------------------------------------------------------------------------
 ;region HotKeys and HotStrings definitions
 ; #IfWinNotActive, ahk_exe Code.exe
-F2::
+F1::
     OutputDebug, % "HotKey F1 Pressed `n"
     Picker_Show()
 return
 #IfWinActive
-
-:?:ino::ion
-::PArfait::Parfait
-::PArfais::Parfait
-::connexino::connexion
-:C:JE::Je
 ;endregion
