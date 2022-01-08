@@ -23,8 +23,8 @@
             "type": "process",
             "command": "rclone",
             "args": [
-                "sync",
-                "dist",
+                "copy",
+                "dist/HotStrings.exe",
                 "hotstrings:"
             ],
             "presentation": {
@@ -41,8 +41,8 @@
             "type": "process",
             "command": "rclone",
             "args": [
-                "sync",
-                "dist",
+                "copy",
+                "dist/HotStrings.exe",
                 "D:/applications/HotStrings"
             ],
             "presentation": {
