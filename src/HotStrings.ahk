@@ -16,7 +16,6 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include <ObjCSV>
 #include <Configuration>
 #include <Picker>
-#include *i <Corrections>
 #include *i <Password>
 
 global version = 6
@@ -166,3 +165,5 @@ F1::
 return
 #IfWinActive
 ;endregion
+
+#include *i <Corrections>
