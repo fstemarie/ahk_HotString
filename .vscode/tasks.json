@@ -24,10 +24,8 @@
             "command": "rclone",
             "args": [
                 "sync",
-                "src",
-                "hotstrings:",
-                "--exclude",
-                "HotStrings.ini"
+                "dist",
+                "hotstrings:"
             ],
             "presentation": {
                 "reveal": "silent"
@@ -44,10 +42,8 @@
             "command": "rclone",
             "args": [
                 "sync",
-                "src",
-                "D:/applications/HotStrings",
-                "--exclude",
-                "HotStrings.ini"
+                "dist",
+                "D:/applications/HotStrings"
             ],
             "presentation": {
                 "reveal": "silent"
