@@ -2,6 +2,7 @@
 ; ----------------------------------------------------------------------------
 
 #include <AnimateWindow>
+#include <AutoXYWH>
 
 global PICKER_LVPICKER
 , PICKER_HWND
