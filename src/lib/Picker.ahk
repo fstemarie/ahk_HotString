@@ -19,8 +19,6 @@ global PICKER_HWND
 , PICKER_BTNSAVE
 , PICKER_LBNOTES
 , PICKER_EDTNOTE
-, W := 1024
-, H := 568
 , WM_ACTIVATEAPP := 0x001C
 , LVM_SETHOVERTIME := 0x1047
 , LVS_EX_HEADERDRAGDROP := 0x10
@@ -28,16 +26,14 @@ global PICKER_HWND
 
 Picker_Build() {
     OutputDebug, % "-- Picker_Build() `n"
-
     Gui, Picker:New, +Owner +Resize +MinSize628x150 +HwndPICKER_HWND
         +LabelPicker_On +AlwaysOnTop, HotStrings
     Gui, Color, BDC3CB
     Gui, Font, s16, Bold
     Gui, Margin, 5, 5
     Gui, Add, Tab3, +vPICKER_TABS x0 y0 w1000 h600, Picker|Notes
-
     Gui, Tab, 1
-    Gui, Add, ListView, w800 h505 -Hdr +AltSubmit -Multi +Grid 
+    Gui, Add, ListView, w800 h505 +Hdr +AltSubmit -Multi +Grid 
         -Border +Report +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND
         +gPicker_lvPicker_OnEvent +NoSort +NoSortHdr
         +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP% Section
@@ -45,34 +41,24 @@ Picker_Build() {
     LV_InsertCol(1, 0, "Treated")
     LV_InsertCol(2, 150, "Trigger")
     LV_InsertCol(3, 843, "Replacement")
-    Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES
-        +gPicker_lbCategories_OnEvent -Border Sort
-    Gui, Add, Button, xs w150 h45 +vPICKER_BTNDOC
-        +gPicker_btnDoc_OnClick, Edit &Doc
-    Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT
-        +gPicker_btnEdit_OnClick, &Text Editor
-    Gui, Add, Button, ys yp wp hp +vPICKER_BTNRELOAD
-        +gPicker_btnReload_OnClick, &Reload
-    Gui, Add, Button, ys yp wp hp +vPICKER_BTNQUIT
-        +gPicker_btnQuit_OnClick, &Quit
+    Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent -Border Sort
+    Gui, Add, Button, xs w150 h45 +vPICKER_BTNDOC +gPicker_btnDoc_OnClick, Edit &Doc
+    Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT +gPicker_btnEdit_OnClick, &Text Editor
+    Gui, Add, Button, ys yp wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
+    Gui, Add, Button, ys yp wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
-
     Gui, Tab, 2
     Gui, Add, ListBox, +vPICKER_LBNOTES w180 h505 +0x100 Section
     Gui, Add, Edit, +vPICKER_EDTNOTE ys w800 hp
-    Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW
-        +gPicker_btnNew_OnClick Section, &New
-    Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE
-        +gPicker_btnDelete_OnClick, &Delete
-    Gui, Add, Button, ys wp hp +vPICKER_BTNSAVE
-        +gPicker_btnSave_OnClick, &Save
-
+    Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
+    Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
+    Gui, Add, Button, ys wp hp +vPICKER_BTNSAVE +gPicker_btnSave_OnClick, &Save
     Gui, Show, w1000 h600 Hide
     AutoXYWH("reset")
-
     OnMessage(WM_ACTIVATEAPP, "Picker_OnWMACTIVATEAPP")
     Picker_lbCategories_Update()
     Picker_lvPicker_Update()
+    ; Gui, Show, w800 h400 Hide
 }
 
 Picker_OnEscape() {
@@ -97,7 +83,6 @@ Picker_OnSize() {
     GuiControl, Move, PICKER_BTNNEW, % "y"posH+10
     GuiControl, Move, PICKER_BTNDELETE, % "y"posH+10
     GuiControl, Move, PICKER_BTNSAVE, % "y"posH+10
-
 }
 
 Picker_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
@@ -231,6 +216,7 @@ Picker_Show() {
     GuiControl, Focus, PICKER_LVPICKER
 
     ; Places the GUI Window in the center of the screen
+    Gui +LastFound
     WinGetPos,,, W, H
     mon := Picker_GetMonitor()
     ctr := Picker_FindCenter(mon, W, H)
@@ -257,8 +243,7 @@ Picker_GetMonitor() {
 Picker_FindCenter(mon, W, H) {
     OutputDebug, % "-- Picker_FindCenter() `n"
     SysGet, mon, Monitor, %mon%
-    return {
-        "guiLeft": Ceil(monLeft + (monRight - monLeft - W) / 2),
-        "guiTop": Ceil(monTop + (monBottom - monTop - H) / 2)
-    }
+    guiLeft := Ceil(monLeft + (monRight - monLeft - W) / 2),
+    guiTop := Ceil(monTop + (monBottom - monTop - H) / 2)
+    return {"guiLeft": guiLeft, "guiTop": guiTop}
 }
