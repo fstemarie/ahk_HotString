@@ -207,14 +207,10 @@ Picker_btnEdit_OnClick() {
         Run, % config.editor
 }
 
-Picker_btnHelp_OnClick() {
-    OutputDebug, % "-- Picker_btnHelp_OnClick() `n"
-    Run, % "https://www.autohotkey.com/docs/KeyList.htm"
-}
-
 Picker_btnNew_OnClick() {
 
 }
+
 Picker_btnDelete_OnClick() {
 
 }
