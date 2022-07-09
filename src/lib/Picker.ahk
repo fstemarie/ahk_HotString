@@ -42,10 +42,10 @@ Picker_Build() {
     LV_InsertCol(2, 150, "Trigger")
     LV_InsertCol(3, 843, "Replacement")
     Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent -Border Sort
-    Gui, Add, Button, xs w150 h45 +vPICKER_BTNDOC +gPicker_btnDoc_OnClick, Edit &Doc
+    Gui, Add, Button, xs w150 h45 +vPICKER_BTNDOC +gPicker_btnDoc_OnClick Section, Edit &Doc
     Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT +gPicker_btnEdit_OnClick, &Text Editor
-    Gui, Add, Button, ys yp wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
-    Gui, Add, Button, ys yp wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
+    Gui, Add, Button, ys wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
+    Gui, Add, Button, ys wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
     Gui, Tab, 2
     Gui, Add, TreeView, +vPICKER_TVNOTES w180 h505 +0x100 Section
