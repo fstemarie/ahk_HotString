@@ -212,7 +212,7 @@ Picker_Show() {
     GuiControl, Focus, PICKER_LVPICKER
 
     ; Places the GUI Window in the center of the screen
-    Gui +LastFound
+    Gui Picker:+LastFound
     WinGetPos,,, W, H
     mon := Picker_GetMonitor()
     ctr := Picker_FindCenter(mon, W, H)
@@ -225,15 +225,14 @@ Picker_GetMonitor() {
     CoordMode, Mouse, Screen
     MouseGetPos, mouseX, mouseY
     SysGet, monCount, MonitorCount
+    mon := 1
     Loop % monCount {
         SysGet, mon, Monitor, %A_Index%
-        if (mouseX >= monLeft && mouseX <= monRight
-        && mouseY >= monTop && mouseY <= monBottom) {
-            mon := A_Index
-            break
-        }
+        if mouseX between %monLeft% and %monRight%
+            if mouseY between %monTop% and %monBottom%
+                mon := A_Index
     }
-    return %mon%
+    return mon
 }
 
 Picker_FindCenter(mon, W, H) {
