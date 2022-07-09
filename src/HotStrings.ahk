@@ -18,8 +18,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include <Picker>
 #include *i <Password>
 
-global version = 6
-, objCSV
+global objCSV
 , hsCache := {}
 , category := ""
 , categories := ""
@@ -27,11 +26,6 @@ global version = 6
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
-Notify_Updated() ; Checks to see if it's been updated to notify the user
-if Check_Updates()
-    Update_Script()
-; Check_Dependencies() ; Checks for and download the dependencies
-
 Load_CSV() ; Loads the data from the CSV file
 Create_HotStrings() ; From the loaded data, create the hotstrings
 Picker_Build() ; Build the Gui
@@ -40,45 +34,6 @@ return
 
 ; ----------------------------------------------------------------------------
 ;region Code unrelated to Gui
-Notify_Updated() {
-    OutputDebug, % "-- Notify_Updated() `n"
-    if FileExist(A_ScriptDir . "\updated.txt") {
-        FileDelete, %A_ScriptDir%\updated.txt
-        TrayTip, Updates, The script has been updated
-    }
-}
-
-Check_Updates() {
-    OutputDebug, % "-- Check_Updates() `n"
-    static updatesAvailable := "New"
-
-    if (updatesAvailable = "New") {
-        url := "https://raw.githubusercontent.com/"
-        . "fstemarie/ahk_HotStrings/master/version.txt"
-        whr := ComObjCreate("WinHttp.WinHttpRequest.5.1")
-        whr.Open("GET", url, true)
-        whr.Send()
-        whr.WaitForResponse()
-        gh_version := Format("{:i}", whr.ResponseText)
-        updatesAvailable := (gh_version > version)
-    }
-    return updatesAvailable
-}
-
-Update_Script() {
-    OutputDebug, % "-- Update_Script() `n"
-    url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/src/lib/Configuration.ahk"
-    UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
-    url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/src/lib/Picker.ahk"
-    UrlDownloadToFile, %url%, %A_ScriptFullPath%\lib
-    url := "https://raw.githubusercontent.com/fstemarie/"
-    . "ahk_HotStrings/master/src/HotStrings.ahk"
-    UrlDownloadToFile, %url%, %A_ScriptFullPath%
-    FileAppend, "", %A_ScriptDir% . "\updated.txt"
-    Reload
-}
 
 Get_Config() {
     OutputDebug, % "-- Get_Config() `n"
