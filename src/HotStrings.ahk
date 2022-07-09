@@ -93,9 +93,10 @@ Load_CSV() {
     objCSV := ObjCSV_CSV2Collection(config.csvFile
     , "Trigger,Replacement,Category,Treated", False)
 
-    if (i = "")
-        return
     i := objCSV.MaxIndex()
+    if !i {
+        return
+    }
     while i >= objCSV.MinIndex() {
         ; Remove rows that don't have the Text field filled
         row := objCSV[i]
