@@ -17,7 +17,7 @@ global PICKER_HWND
 , PICKER_BTNNEW
 , PICKER_BTNDELETE
 , PICKER_BTNSAVE
-, PICKER_LBNOTES
+, PICKER_TVNOTES
 , PICKER_EDTNOTE
 , WM_ACTIVATEAPP := 0x001C
 , LVM_SETHOVERTIME := 0x1047
@@ -48,7 +48,7 @@ Picker_Build() {
     Gui, Add, Button, ys yp wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
     Gui, Tab, 2
-    Gui, Add, ListBox, +vPICKER_LBNOTES w180 h505 +0x100 Section
+    Gui, Add, TreeView, +vPICKER_TVNOTES w180 h505 +0x100 Section
     Gui, Add, Edit, +vPICKER_EDTNOTE ys w800 hp
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
     Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
@@ -58,7 +58,6 @@ Picker_Build() {
     OnMessage(WM_ACTIVATEAPP, "Picker_OnWMACTIVATEAPP")
     Picker_lbCategories_Update()
     Picker_lvPicker_Update()
-    ; Gui, Show, w800 h400 Hide
 }
 
 Picker_OnEscape() {
@@ -72,14 +71,14 @@ Picker_OnSize() {
         return
     AutoXYWH("wh", "PICKER_TABS", "PICKER_LVPICKER", "PICKER_EDTNOTE")
     AutoXYWH("xh", "PICKER_LBCATEGORIES")
-    AutoXYWH("h", "PICKER_LBNOTES")
+    AutoXYWH("h", "PICKER_TVNOTES")
     GuiControlGet, pos, Pos, PICKER_LVPICKER
     GuiControl, Move, PICKER_BTNDOC, % "y"posH+10
     GuiControl, Move, PICKER_BTNEDIT, % "y"posH+10
     GuiControl, Move, PICKER_BTNRELOAD, % "y"posH+10
     GuiControl, Move, PICKER_BTNQUIT, % "y"posH+10
 
-    GuiControlGet, pos, Pos, PICKER_LBNOTES
+    GuiControlGet, pos, Pos, PICKER_TVNOTES
     GuiControl, Move, PICKER_BTNNEW, % "y"posH+10
     GuiControl, Move, PICKER_BTNDELETE, % "y"posH+10
     GuiControl, Move, PICKER_BTNSAVE, % "y"posH+10
