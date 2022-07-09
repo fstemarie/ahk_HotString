@@ -28,6 +28,7 @@ Picker_Build() {
     OutputDebug, % "-- Picker_Build() `n"
     Gui, Picker:New, +Owner +Resize +MinSize628x150 +HwndPICKER_HWND
         +LabelPicker_On +AlwaysOnTop, HotStrings
+    Gui, Picker:Default
     Gui, Color, BDC3CB
     Gui, Font, s16, Bold
     Gui, Margin, 5, 5
@@ -130,7 +131,6 @@ Picker_lbCategories_Update() {
 
 Picker_lvPicker_OnEvent() {
     OutputDebug, % "-- Picker_lvPicker_OnEvent() `n"
-    Gui, Picker:Default
     Gui, ListView, PICKER_LVPICKER
     LV_GetText(cell, A_EventInfo, 3)
     LV_GetText(treated, A_EventInfo, 1)
@@ -150,20 +150,17 @@ Picker_lvPicker_Update() {
     OutputDebug, % "-- Picker_lvPicker_Update() `n"
     ; Filter the Data
 
-    Gui, Picker:Default
     Gui, ListView, PICKER_LVPICKER
-    GuiControl, -Redraw, PICKER_LVPICKER
     LV_Delete()
     ; Fill the ListView
     Critical, On
+    GuiControl, -Redraw, PICKER_LVPICKER
     loop, % objCSV.MaxIndex()
     {
         row := objCSV[A_Index]
-        filtered := false
         if (category and category != "*" and row.Category != category)
-            filtered := true
-        if (!filtered)
-            LV_Add("", row["Treated"], row["Trigger"], row["Replacement"])
+            continue
+        LV_Add("", row["Treated"], row["Trigger"], row["Replacement"])
     }
     GuiControl, +Redraw, PICKER_LVPICKER
     Critical, Off
