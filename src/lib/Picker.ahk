@@ -33,24 +33,26 @@ Picker_Build() {
     Gui, Font, s16, Bold
     Gui, Margin, 5, 5
     Gui, Add, Tab3, +vPICKER_TABS x0 y0 w1000 h600, Picker|Notes
+    
     Gui, Tab, 1
-    Gui, Add, ListView, w800 h505 +Hdr +AltSubmit -Multi +Grid 
-        -Border +Report +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND
-        +gPicker_lvPicker_OnEvent +NoSort +NoSortHdr
+    Gui, Add, ListView, w800 h505 +AltSubmit -Multi +Grid -Border
+        +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND +gPicker_lvPicker_OnEvent
         +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP% Section
     PostMessage, %LVM_SETHOVERTIME%, 0, 1,, ahk_id %PICKER_LVPICKER_HWND%
     LV_InsertCol(1, 0, "Treated")
-    LV_InsertCol(2, 150, "Trigger")
-    LV_InsertCol(3, 843, "Replacement")
-    Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent -Border Sort
+    LV_InsertCol(2, "150 Sort", "Trigger")
+    LV_InsertCol(3, AutoHdr, "Replacement")
+    Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES
+        +gPicker_lbCategories_OnEvent -Border Sort
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNDOC +gPicker_btnDoc_OnClick Section, Edit &Doc
     Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT +gPicker_btnEdit_OnClick, &Text Editor
     Gui, Add, Button, ys wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
     Gui, Add, Button, ys wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
+    
     Gui, Tab, 2
-    Gui, Add, TreeView, +vPICKER_TVNOTES w180 h505 +0x100 Section
-    Gui, Add, Edit, +vPICKER_EDTNOTE ys w800 hp
+    Gui, Add, TreeView, +vPICKER_TVNOTES w490 h505 Section
+    Gui, Add, Edit, +vPICKER_EDTNOTE ys w490 hp
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
     Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
     Gui, Add, Button, ys wp hp +vPICKER_BTNSAVE +gPicker_btnSave_OnClick, &Save
@@ -70,9 +72,10 @@ Picker_OnSize() {
     OutputDebug, % "-- Picker_OnSize() `n"
     if (A_EventInfo = 1)
         return
-    AutoXYWH("wh", "PICKER_TABS", "PICKER_LVPICKER", "PICKER_EDTNOTE")
+    AutoXYWH("wh", "PICKER_TABS", "PICKER_LVPICKER")
     AutoXYWH("xh", "PICKER_LBCATEGORIES")
-    AutoXYWH("h", "PICKER_TVNOTES")
+    AutoXYWH("w0.5 h", "PICKER_TVNOTES")
+    AutoXYWH("w0.5 x0.5 h", "PICKER_EDTNOTE")
     GuiControlGet, pos, Pos, PICKER_LVPICKER
     GuiControl, Move, PICKER_BTNDOC, % "y"posH+10
     GuiControl, Move, PICKER_BTNEDIT, % "y"posH+10
