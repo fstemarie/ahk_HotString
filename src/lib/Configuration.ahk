@@ -44,40 +44,6 @@ Class Configuration {
         }
     }
 
-    csvEditor {
-        get {
-            configFile := this._configFile
-            if !this._csvEditor {
-                IniRead, csvEditor, %configFile%, Configuration, CsvEditor
-                if (csvEditor == "ERROR") {
-                    FileSelectFile, csvEditor, 3
-                    , C:\Windows\notepad.exe
-                    , Choose your CSV text editor
-                    , Text Editor (*.exe)
-                    if (csvEditor) {
-                        IniWrite, %csvEditor%, %configFile%
-                        , Configuration, CsvEditor
-                    }
-                }
-                this._csvEditor := csvEditor
-            }
-            return this._csvEditor
-        }
-        set {
-            configFile := this._configFile
-            if (SubStr(value, -4) = ".exe" ) {
-                if InStr(FileExist(value), "N") {
-                    IniWrite, %value%, %configFile%, Configuration, CsvEditor
-                    this._csvEditor := value
-                } else {
-                    throw "Text Editor must exist"
-                }
-            } else {
-                throw "Text Editor must be an executable"
-            }
-        }
-    }
-
     document {
         get {
             configFile := this._configFile
