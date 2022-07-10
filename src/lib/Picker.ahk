@@ -184,8 +184,7 @@ Picker_btnDoc_OnClick() {
 
 Picker_btnEdit_OnClick() {
     OutputDebug, % "-- Picker_btnEdit_OnClick() `n"
-    if config.editor
-        Run, % config.editor
+    Run, notepad.exe
 }
 
 Picker_btnNew_OnClick() {
