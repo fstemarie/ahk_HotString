@@ -9,7 +9,6 @@ global PICKER_HWND
 , PICKER_LVPICKER
 , PICKER_LVPICKER_HWND
 , PICKER_LBCATEGORIES
-, PICKER_TXTPICKER
 , PICKER_BTNDOC
 , PICKER_BTNEDIT
 , PICKER_BTNRELOAD
@@ -19,7 +18,8 @@ global PICKER_HWND
 , PICKER_BTNSAVE
 , PICKER_TVNOTES
 , PICKER_EDTNOTE
-, WM_ACTIVATEAPP := 0x001C
+
+WM_ACTIVATEAPP := 0x001C
 , LVM_SETHOVERTIME := 0x1047
 , LVS_EX_HEADERDRAGDROP := 0x10
 , LVS_EX_TRACKSELECT := 0x8
@@ -61,6 +61,49 @@ Picker_Build() {
     OnMessage(WM_ACTIVATEAPP, "Picker_OnWMACTIVATEAPP")
     Picker_lbCategories_Update()
     Picker_lvPicker_Update()
+}
+
+Picker_Show() {
+    OutputDebug, % "-- Picker_Show() `n"
+
+    ; Select the default category if there is one
+    if config.stickyDefault and config.defaultCategory
+        category := config.defaultCategory
+    Picker_lvPicker_Update()
+    GuiControl, Choose, PICKER_LBCATEGORIES, %category%
+    LV_Modify(1, "+Focus +Select")
+    GuiControl, Focus, PICKER_LVPICKER
+
+    ; Places the GUI Window in the center of the screen
+    Gui Picker:+LastFound
+    WinGetPos,,, W, H
+    mon := Picker_GetMonitor()
+    ctr := Picker_FindCenter(mon, W, H)
+    Gui, Picker:Show, % "x"ctr.guiLeft " y"ctr.guiTop " hide"
+    AnimateWindow(PICKER_HWND, 125, AW_ACTIVATE + AW_BLEND)
+}
+
+Picker_GetMonitor() {
+    OutputDebug, % "-- Picker_GetMonitor() `n"
+    CoordMode, Mouse, Screen
+    MouseGetPos, mouseX, mouseY
+    SysGet, monCount, MonitorCount
+    mon := 1
+    Loop % monCount {
+        SysGet, mon, Monitor, %A_Index%
+        if mouseX between %monLeft% and %monRight%
+            if mouseY between %monTop% and %monBottom%
+                mon := A_Index
+    }
+    return mon
+}
+
+Picker_FindCenter(mon, W, H) {
+    OutputDebug, % "-- Picker_FindCenter() `n"
+    SysGet, mon, Monitor, %mon%
+    guiLeft := Ceil(monLeft + (monRight - monLeft - W) / 2),
+    guiTop := Ceil(monTop + (monBottom - monTop - H) / 2)
+    return {"guiLeft": guiLeft, "guiTop": guiTop}
 }
 
 Picker_OnEscape() {
@@ -144,8 +187,6 @@ Picker_lvPicker_OnEvent() {
         } else {
             Send, %cell%
         }
-    } else if (A_GuiEvent == "I") {
-        GuiControl, Text, PICKER_TXTPICKER, %cell%
     }
 }
 
@@ -200,47 +241,4 @@ Picker_btnDelete_OnClick() {
 
 Picker_btnSave_OnClick() {
 
-}
-
-Picker_Show() {
-    OutputDebug, % "-- Picker_Show() `n"
-
-    ; Select the default category if there is one
-    if config.stickyDefault and config.defaultCategory
-        category := config.defaultCategory
-    Picker_lvPicker_Update()
-    GuiControl, Choose, PICKER_LBCATEGORIES, %category%
-    LV_Modify(1, "+Focus +Select")
-    GuiControl, Focus, PICKER_LVPICKER
-
-    ; Places the GUI Window in the center of the screen
-    Gui Picker:+LastFound
-    WinGetPos,,, W, H
-    mon := Picker_GetMonitor()
-    ctr := Picker_FindCenter(mon, W, H)
-    Gui, Picker:Show, % "x"ctr.guiLeft " y"ctr.guiTop " hide"
-    AnimateWindow(PICKER_HWND, 125, AW_ACTIVATE + AW_BLEND)
-}
-
-Picker_GetMonitor() {
-    OutputDebug, % "-- Picker_GetMonitor() `n"
-    CoordMode, Mouse, Screen
-    MouseGetPos, mouseX, mouseY
-    SysGet, monCount, MonitorCount
-    mon := 1
-    Loop % monCount {
-        SysGet, mon, Monitor, %A_Index%
-        if mouseX between %monLeft% and %monRight%
-            if mouseY between %monTop% and %monBottom%
-                mon := A_Index
-    }
-    return mon
-}
-
-Picker_FindCenter(mon, W, H) {
-    OutputDebug, % "-- Picker_FindCenter() `n"
-    SysGet, mon, Monitor, %mon%
-    guiLeft := Ceil(monLeft + (monRight - monLeft - W) / 2),
-    guiTop := Ceil(monTop + (monBottom - monTop - H) / 2)
-    return {"guiLeft": guiLeft, "guiTop": guiTop}
 }
