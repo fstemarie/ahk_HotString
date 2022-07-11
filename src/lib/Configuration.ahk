@@ -44,6 +44,27 @@ Class Configuration {
         }
     }
 
+    notesDir {
+        get {
+            configFile := this._configFile
+            if !this._notesDir {
+                IniRead, notesDir, %configFile%, Configuration, notesDir
+                if (notesDir == "ERROR") {
+                    IniWrite, %NULL%, %configFile%, Configuration, notesDir
+                    notesDir :=
+                }
+                this._notesDir := notesDir
+            }
+            return this._notesDir
+
+        }
+        set {
+            configFile := this._configFile
+            IniWrite, value, %configFile%, Configuration, notesDir
+            this._notesDir := value
+        }
+    }
+
     document {
         get {
             configFile := this._configFile
@@ -53,8 +74,7 @@ Class Configuration {
                     FileSelectFile, document, 3, %A_MyDocuments%
                     , Choose your document, Document (*.*)
                     if (document) {
-                        IniWrite, %document%, %configFile%
-                        , Configuration, Document
+                        IniWrite, %document%, %configFile%, Configuration, Document
                     }
                 }
                 this._document := document
@@ -76,11 +96,9 @@ Class Configuration {
         get {
             configFile := this._configFile
             if !this._defaultCategory {
-                IniRead, defaultCategory, %configFile%
-                , Configuration, DefaultCategory
+                IniRead, defaultCategory, %configFile%, Configuration, DefaultCategory
                 if (defaultCategory == "ERROR") {
-                    IniWrite, %NULL%, %configFile%
-                    , Configuration, DefaultCategory
+                    IniWrite, %NULL%, %configFile%, Configuration, DefaultCategory
                     defaultCategory :=
                 }
                 this._defaultCategory := defaultCategory
@@ -90,8 +108,7 @@ Class Configuration {
         }
         set {
             configFile := this._configFile
-            IniWrite, value, %configFile%
-            , Configuration, DefaultCategory
+            IniWrite, value, %configFile%, Configuration, DefaultCategory
             this._defaultCategory := value
         }
     }
@@ -104,8 +121,7 @@ Class Configuration {
                 , Configuration, StickyDefault
                 if (stickyDefault == "ERROR") {
                     stickyDefault := true
-                    IniWrite, %stickyDefault%, %configFile%
-                    , Configuration, StickyDefault
+                    IniWrite, %stickyDefault%, %configFile%, Configuration, StickyDefault
                 }
                 this._stickyDefault := stickyDefault
             }
@@ -114,8 +130,7 @@ Class Configuration {
         set {
             configFile := this._configFile
             value := value?true:false
-            IniWrite, %value%, %configFile%
-            , Configuration, StickyDefault
+            IniWrite, %value%, %configFile%, Configuration, StickyDefault
             this._stickyDefault := value
         }
     }
