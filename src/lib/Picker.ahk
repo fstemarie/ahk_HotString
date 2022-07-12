@@ -18,8 +18,7 @@ global PICKER_HWND
 , PICKER_BTNSAVE
 , PICKER_TVNOTES
 , PICKER_EDTNOTE
-
-WM_ACTIVATEAPP := 0x001C
+, WM_ACTIVATEAPP := 0x001C
 , LVM_SETHOVERTIME := 0x1047
 , LVS_EX_HEADERDRAGDROP := 0x10
 , LVS_EX_TRACKSELECT := 0x8
@@ -40,7 +39,7 @@ Picker_Build() {
         +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP% Section
     PostMessage, %LVM_SETHOVERTIME%, 0, 1,, ahk_id %PICKER_LVPICKER_HWND%
     LV_InsertCol(1, 0, "Treated")
-    LV_InsertCol(2, "150 Sort", "Trigger")
+    LV_InsertCol(2, 150, "Trigger")
     LV_InsertCol(3, AutoHdr, "Replacement")
     Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES
         +gPicker_lbCategories_OnEvent -Border Sort
