@@ -1,4 +1,4 @@
-﻿; Ahk2Exe-AddResource ../assets/Hgreen.ico, 160  ; Replaces 'H on green'
+; Ahk2Exe-AddResource ../assets/Hgreen.ico, 160  ; Replaces 'H on green'
 ; Ahk2Exe-AddResource ../assets/Sgreen.ico, 206  ; Replaces 'S on green'
 ; Ahk2Exe-AddResource ../assets/Hred.ico, 207    ; Replaces 'H on red'
 ; Ahk2Exe-AddResource ../assets/Sred.ico, 208    ; Replaces 'S on red'
@@ -34,13 +34,35 @@ return
 
 ; ----------------------------------------------------------------------------
 ;region Code unrelated to Gui
-
 Get_Config() {
     OutputDebug, % "-- Get_Config() `n"
     configFile := SubStr(A_ScriptFullPath, 1, -4) . ".ini"
     if !FileExist(configFile)
         FileAppend,, %configFile%
     return new Configuration(configFile)
+}
+
+Check_Config() {
+    if !config.csvFile {
+        FileSelectFile, fsfValue, 3,, Choose your HotStrings CSV file, CSV File (*.csv)
+        if (fsfValue) {
+            config.csvFile := fsfValue
+        } else {
+            OutputDebug, % "No CSV File selected"
+            MsgBox, 16, HotStrings.ahk - No CSV File, You MUST select a CSV File
+            ExitApp, 1
+        }
+    }
+    if !config.notesDir {
+        FileSelectFolder, fsfValue, %A_MyDocuments%,, Choose a folder for notes
+        if (fsfValue) {
+            config.notesDir := fsfValue
+        } else {
+            OutputDebug, % "No notes folder selected"
+            MsgBox, 16, HotStrings.ahk - No notes Folder, You MUST select a notes folder
+            ExitApp, 1
+        }
+    }
 }
 
 Load_CSV() {

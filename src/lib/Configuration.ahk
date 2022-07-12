@@ -12,18 +12,8 @@ Class Configuration {
             if !this._csvFile {
                 IniRead, csvFile, %configFile%, Configuration, CsvFile
                 if (csvFile == "ERROR") {
-                    FileSelectFile, fsfValue, 3
-                    ,, Choose your HotStrings CSV file, CSV File (*.csv)
-                    if (fsfValue) {
-                        IniWrite, %fsfValue%, %configFile%
-                        , Configuration, CsvFile
-                        csvFile := fsfValue
-                    } else {
-                        OutputDebug, % "Must have a CSV File"
-                        MsgBox, 16, HotStrings.ahk - No CSV File
-                        , Must have a CSV File
-                        ExitApp, 1
-                    }
+                    IniWrite, %NULL%, %configFile%, Configuration, CsvFile
+                    csvFile :=
                 }
                 this._csvFile := csvFile
             }
@@ -60,8 +50,12 @@ Class Configuration {
         }
         set {
             configFile := this._configFile
-            IniWrite, value, %configFile%, Configuration, notesDir
+            if InStr(FileExist(value), "D") {
+                IniWrite, %value%, %configFile%, Configuration, notesDir
             this._notesDir := value
+            } else {
+                throw "Notes folder must exist"
+            }
         }
     }
 
