@@ -10,9 +10,9 @@ Class Configuration {
         get {
             configFile := this._configFile
             if !this._csvFile {
-                IniRead, csvFile, %configFile%, Configuration, CsvFile
+                IniRead, csvFile, %configFile%, Configuration, csvFile
                 if (csvFile == "ERROR") {
-                    IniWrite, %NULL%, %configFile%, Configuration, CsvFile
+                    IniWrite, %NULL%, %configFile%, Configuration, csvFile
                     csvFile :=
                 }
                 this._csvFile := csvFile
@@ -23,7 +23,7 @@ Class Configuration {
             configFile := this._configFile
             if (SubStr(value, -4) = ".csv" ) {
                 if InStr(FileExist(value), "N") {
-                    IniWrite, %value%, %configFile%, Configuration, CsvFile
+                    IniWrite, %value%, %configFile%, Configuration, csvFile
                     this._csvFile := value
                 } else {
                     throw "CSV File must exist"
@@ -52,7 +52,7 @@ Class Configuration {
             configFile := this._configFile
             if InStr(FileExist(value), "D") {
                 IniWrite, %value%, %configFile%, Configuration, notesDir
-            this._notesDir := value
+                this._notesDir := value
             } else {
                 throw "Notes folder must exist"
             }
@@ -63,12 +63,12 @@ Class Configuration {
         get {
             configFile := this._configFile
             if (!this._document) {
-                IniRead, document, %configFile%, Configuration, Document
+                IniRead, document, %configFile%, Configuration, document
                 if (document == "ERROR") {
                     FileSelectFile, document, 3, %A_MyDocuments%
                     , Choose your document, Document (*.*)
                     if (document) {
-                        IniWrite, %document%, %configFile%, Configuration, Document
+                        IniWrite, %document%, %configFile%, Configuration, document
                     }
                 }
                 this._document := document
@@ -78,7 +78,7 @@ Class Configuration {
         set {
             configFile := this._configFile
             if InStr(FileExist(value), "N") {
-                IniWrite, %value%, %configFile%, Configuration, Document
+                IniWrite, %value%, %configFile%, Configuration, document
                 this._document := value
             } else {
                 throw "Document must exist"
@@ -90,9 +90,9 @@ Class Configuration {
         get {
             configFile := this._configFile
             if !this._defaultCategory {
-                IniRead, defaultCategory, %configFile%, Configuration, DefaultCategory
+                IniRead, defaultCategory, %configFile%, Configuration, defaultCategory
                 if (defaultCategory == "ERROR") {
-                    IniWrite, %NULL%, %configFile%, Configuration, DefaultCategory
+                    IniWrite, %NULL%, %configFile%, Configuration, defaultCategory
                     defaultCategory :=
                 }
                 this._defaultCategory := defaultCategory
@@ -102,7 +102,7 @@ Class Configuration {
         }
         set {
             configFile := this._configFile
-            IniWrite, value, %configFile%, Configuration, DefaultCategory
+            IniWrite, value, %configFile%, Configuration, defaultCategory
             this._defaultCategory := value
         }
     }
@@ -111,11 +111,10 @@ Class Configuration {
         get {
             configFile := this._configFile
             if !this._stickyDefault {
-                IniRead, stickyDefault, %configFile%
-                , Configuration, StickyDefault
+                IniRead, stickyDefault, %configFile%, Configuration, stickyDefault
                 if (stickyDefault == "ERROR") {
                     stickyDefault := true
-                    IniWrite, %stickyDefault%, %configFile%, Configuration, StickyDefault
+                    IniWrite, %stickyDefault%, %configFile%, Configuration, stickyDefault
                 }
                 this._stickyDefault := stickyDefault
             }
@@ -124,7 +123,7 @@ Class Configuration {
         set {
             configFile := this._configFile
             value := value?true:false
-            IniWrite, %value%, %configFile%, Configuration, StickyDefault
+            IniWrite, %value%, %configFile%, Configuration, stickyDefault
             this._stickyDefault := value
         }
     }
