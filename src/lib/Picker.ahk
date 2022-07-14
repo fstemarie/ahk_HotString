@@ -23,16 +23,20 @@ global PICKER_HWND
 , LVS_EX_HEADERDRAGDROP := 0x10
 , LVS_EX_TRACKSELECT := 0x8
 
-Picker_Build() {
+hsCol := ""
+category := ""
+categories := ""
+
+Picker_Gui_Build() {
     OutputDebug, % "-- Picker_Build() `n"
-    Gui, Picker:New, +Owner +Resize +MinSize628x150 +HwndPICKER_HWND
-        +LabelPicker_On +AlwaysOnTop, HotStrings
-    Gui, Picker:Default
+    global category, PICKER_LBCATEGORIES
+    Gui, Picker:New, +Owner +Resize +AlwaysOnTop +MinSize628x150 +HwndPICKER_HWND
+    +LabelPicker_On, HotStrings
     Gui, Color, BDC3CB
     Gui, Font, s16, Bold
     Gui, Margin, 5, 5
     Gui, Add, Tab3, +vPICKER_TABS x0 y0 w1000 h600, Picker|Notes
-    
+
     Gui, Tab, 1
     Gui, Add, ListView, w800 h505 +AltSubmit -Multi +Grid -Border
         +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND +gPicker_lvPicker_OnEvent
@@ -40,49 +44,73 @@ Picker_Build() {
     PostMessage, %LVM_SETHOVERTIME%, 0, 1,, ahk_id %PICKER_LVPICKER_HWND%
     LV_InsertCol(1, 0, "Treated")
     LV_InsertCol(2, 150, "Trigger")
-    LV_InsertCol(3, AutoHdr, "Replacement")
-    Gui, Add, ListBox, ys w180 hp 0x100 +vPICKER_LBCATEGORIES
-        +gPicker_lbCategories_OnEvent -Border Sort
+    LV_InsertCol(3, 20000, "Replacement")
+    Gui, Add, ListBox, ys w180 hp 0x100 -Border Sort
+        +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNDOC +gPicker_btnDoc_OnClick Section, Edit &Doc
     Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT +gPicker_btnEdit_OnClick, &Text Editor
     Gui, Add, Button, ys wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
     Gui, Add, Button, ys wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
-    
+
     Gui, Tab, 2
-    Gui, Add, TreeView, +vPICKER_TVNOTES w490 h505 Section
-    Gui, Add, Edit, +vPICKER_EDTNOTE ys w490 hp
+    Gui, Add, TreeView, w490 h505 Section +vPICKER_TVNOTES +gPicker_tvNotes_OnEvent
+    Gui, Add, Edit, ys w490 hp +vPICKER_EDTNOTE
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
     Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
     Gui, Add, Button, ys wp hp +vPICKER_BTNSAVE +gPicker_btnSave_OnClick, &Save
     Gui, Show, w1000 h600 Hide
     AutoXYWH("reset")
     OnMessage(WM_ACTIVATEAPP, "Picker_OnWMACTIVATEAPP")
+    category := config.defaultCategory?config.defaultCategory:"*"
     Picker_lbCategories_Update()
-    Picker_lvPicker_Update()
 }
 
-Picker_Show() {
+Picker_Gui_Show() {
     OutputDebug, % "-- Picker_Show() `n"
-
+    global category
+    Gui Picker:Default
+    Gui Picker:+LastFound
     ; Select the default category if there is one
-    if config.stickyDefault and config.defaultCategory
+    if config.stickyDefault and config.defaultCategory {
         category := config.defaultCategory
+        GuiControl, ChooseString, PICKER_LBCATEGORIES, %category%
+    }
     Picker_lvPicker_Update()
-    GuiControl, Choose, PICKER_LBCATEGORIES, %category%
-    LV_Modify(1, "+Focus +Select")
-    GuiControl, Focus, PICKER_LVPICKER
 
     ; Places the GUI Window in the center of the screen
-    Gui Picker:+LastFound
     WinGetPos,,, W, H
-    mon := Picker_GetMonitor()
-    ctr := Picker_FindCenter(mon, W, H)
+    mon := Picker_Get_Monitor()
+    ctr := Picker_Find_Center(mon, W, H)
     Gui, Picker:Show, % "x"ctr.guiLeft " y"ctr.guiTop " hide"
     AnimateWindow(PICKER_HWND, 125, AW_ACTIVATE + AW_BLEND)
+    WinActivate
+    GuiControl, Focus, PICKER_LVPICKER
 }
 
-Picker_GetMonitor() {
+Picker_Load_HotStrings(objCSV) {
+    global hsCol, categories
+
+    if !objCSV
+        return
+    if objCSV.Count() = 0
+        return
+
+    hsCol := objCSV
+    Loop % hsCol.Count() {
+        category := hsCol[A_Index]["Category"]
+        ; Gather all the categories
+        categories .= category . "|"
+        ; Find the default category if there is one
+        if SubStr(cat, 1, 1) = "@"
+            config.defaultCategory := category
+    }
+    Sort, categories, U D|
+    categories := "*|" . categories
+    Picker_lbCategories_Update()
+}
+
+Picker_Get_Monitor() {
     OutputDebug, % "-- Picker_GetMonitor() `n"
     CoordMode, Mouse, Screen
     MouseGetPos, mouseX, mouseY
@@ -92,12 +120,12 @@ Picker_GetMonitor() {
         SysGet, mon, Monitor, %A_Index%
         if mouseX between %monLeft% and %monRight%
             if mouseY between %monTop% and %monBottom%
-                mon := A_Index
+            mon := A_Index
     }
     return mon
 }
 
-Picker_FindCenter(mon, W, H) {
+Picker_Find_Center(mon, W, H) {
     OutputDebug, % "-- Picker_FindCenter() `n"
     SysGet, mon, Monitor, %mon%
     guiLeft := Ceil(monLeft + (monRight - monLeft - W) / 2),
@@ -163,6 +191,7 @@ Picker_btnSubmit_OnClick() {
 
 Picker_lbCategories_OnEvent() {
     OutputDebug, % "-- Picker_lbCategories_OnEvent() `n"
+    global category
     if (A_GuiEvent = "Normal") {
         GuiControlGet, category,, PICKER_LBCATEGORIES
         Picker_lvPicker_Update()
@@ -171,11 +200,14 @@ Picker_lbCategories_OnEvent() {
 
 Picker_lbCategories_Update() {
     OutputDebug, % "-- Picker_lbCategories_Update() `n"
+    global category, categories
     GuiControl, Text, PICKER_LBCATEGORIES, %categories%
+    GuiControl, ChooseString, PICKER_LBCATEGORIES, %category%
 }
 
 Picker_lvPicker_OnEvent() {
     OutputDebug, % "-- Picker_lvPicker_OnEvent() `n"
+    global Picker_LVPICKER
     Gui, ListView, PICKER_LVPICKER
     LV_GetText(cell, A_EventInfo, 3)
     LV_GetText(treated, A_EventInfo, 1)
@@ -191,19 +223,20 @@ Picker_lvPicker_OnEvent() {
 
 Picker_lvPicker_Update() {
     OutputDebug, % "-- Picker_lvPicker_Update() `n"
-    ; Filter the Data
-
+    global hsCol, category
+    if !hsCol return
+        ; Filter the Data
     Gui, ListView, PICKER_LVPICKER
     LV_Delete()
     ; Fill the ListView
     Critical, On
     GuiControl, -Redraw, PICKER_LVPICKER
-    loop, % objCSV.MaxIndex()
+    loop, % hsCol.Length()
     {
-        row := objCSV[A_Index]
-        if (category and category != "*" and row.Category != category)
+        hs := hsCol[A_Index]
+        if (category != "*" and hs["Category"] != category)
             continue
-        LV_Add("", row["Treated"], row["Trigger"], row["Replacement"])
+        LV_Add("", hs["Treated"], hs["Trigger"], hs["Replacement"])
     }
     GuiControl, +Redraw, PICKER_LVPICKER
     Critical, Off

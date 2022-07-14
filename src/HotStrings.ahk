@@ -1,4 +1,4 @@
-; Ahk2Exe-AddResource ../assets/Hgreen.ico, 160  ; Replaces 'H on green'
+﻿; Ahk2Exe-AddResource ../assets/Hgreen.ico, 160  ; Replaces 'H on green'
 ; Ahk2Exe-AddResource ../assets/Sgreen.ico, 206  ; Replaces 'S on green'
 ; Ahk2Exe-AddResource ../assets/Hred.ico, 207    ; Replaces 'H on red'
 ; Ahk2Exe-AddResource ../assets/Sred.ico, 208    ; Replaces 'S on red'
@@ -18,22 +18,21 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include <Picker>
 #include *i <Password>
 
-global objCSV
-, hsCache := {}
-, category := ""
-, categories := ""
-, config := Get_Config()
+global config
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
+config := Get_Config()
+Check_Config()
 Load_CSV() ; Loads the data from the CSV file
-Create_HotStrings() ; From the loaded data, create the hotstrings
-Picker_Build() ; Build the Gui
+Picker_Gui_Build()
 return
 ;endregion
 
 ; ----------------------------------------------------------------------------
 ;region Code unrelated to Gui
+
+; Create the config object
 Get_Config() {
     OutputDebug, % "-- Get_Config() `n"
     configFile := SubStr(A_ScriptFullPath, 1, -4) . ".ini"
@@ -42,6 +41,7 @@ Get_Config() {
     return new Configuration(configFile)
 }
 
+; check if the CSV file and notes directory are configured and exists
 Check_Config() {
     if !config.csvFile {
         FileSelectFile, fsfValue, 3,, Choose your HotStrings CSV file, CSV File (*.csv)
@@ -65,71 +65,70 @@ Check_Config() {
     }
 }
 
+; Load the CSV file, send the data to the gui
 Load_CSV() {
     OutputDebug, % "-- Load_CSV() `n"
+    hsCol := {}
     objCSV := ObjCSV_CSV2Collection(config.csvFile
     , "Trigger,Replacement,Category,Treated", False)
 
-    i := objCSV.MaxIndex()
-    if !i {
-        return
+    if !objCSV {
+        MsgBox, 0x1016, Critical Error, Error loading CSV File
+        ExitApp 1
     }
+    if objCSV.Count() = 0
+        return
+    i := objCSV.MaxIndex()
     while i >= objCSV.MinIndex() {
         ; Remove rows that don't have the Text field filled
-        row := objCSV[i]
-        if !row.Replacement {
+        hs := objCSV[i]
+        if !hs.Replacement {
             objCSV.RemoveAt(i--)
             continue
         }
-        ; Gather all the categories
-        categories .= row.Category . "|"
-
-        ; Find the default category if there is one
-        if SubStr(row.Category, 1, 1) = "@"
-            config.defaultCategory := row.Category
-
-        ; Fill hsCache with all the hotstrings
-        if !hsCache.HasKey(row.Trigger)
-            hsCache[row.Trigger] := []
-        objHS := {Trigger: row.Trigger, Replacement: row.Replacement
-        , Treated: row.Treated}
-        hsCache[row.Trigger].Push(objHS)
+        trigger := hs["Trigger"] := trim(hs["Trigger"])
+        ; Fill hsCol with all the hotstrings
+        if trigger {
+            if !hsCol.HasKey(trigger)
+                hsCol[trigger] := []
+            ; hs := {Trigger: row["Trigger"], Replacement: row["Replacement"], Treated: row["Treated"]}
+            hsCol[trigger].Push(hs)
+        }
         i--
     }
-    Sort, categories, U D|
-    categories := "*|" . categories
-    config.defaultCategory := config.defaultCategory?config.defaultCategory
-    category := config.defaultCategory?config.defaultCategory:"*"
+    Create_HotStrings(hsCol)
+    Picker_Load_HotStrings(objCSV)
 }
 
-Create_HotStrings() {
+; From the loaded data, create the hotstrings
+Create_HotStrings(hsCol) {
     OutputDebug, % "-- Create_HotStrings() `n"
 
     ; Setup HotStrings
-    For trigger, arrHS in hsCache {
-        objHS := arrHS[1]
-        Hotstring("`:X`:" objHS.Trigger, "Send_Replacement")
-        OutputDebug, % A_Tab . "Added HotString: " objHS.Trigger "`n"
+    For trigger, _ in hsCol {
+        Hotstring("`:X`:" trigger, "Send_Replacement")
+        OutputDebug, % A_Tab . "Added HotString: " trigger "`n"
     }
 }
 
+; Send the replacement text related to the trigger
 Send_Replacement() {
     OutputDebug, % "-- Send_Replacement() `n"
     trigger := SubStr(A_ThisHotkey, 4)
-    if hsCache.HasKey(trigger) {
-        arrHS := hsCache[trigger]
+    if hsCol.HasKey(trigger) {
+        arrHS := hsCol[trigger]
         OutputDebug, % A_Tab . "Trigger = " . trigger
         OutputDebug, % A_Tab . "arrHS.Count() = " . arrHS.Count()
         if arrHS.Count() = 1 {
-            objHS := arrHS[1]
+            hs := arrHS[1]
         } else if arrHS.Count() > 1 {
-            objHS := arrHS.Pop()
-            arrHS.InsertAt(1, objHS)
+            hs := arrHS.Pop()
+            arrHS.InsertAt(1, hs)
         }
-        if objHS.Treated {
-            Send, % objHS.Replacement
+        if hs.Treated {
+            Send, % hs.Replacement
         } else {
-            SendRaw, % objHS.Replacement
+            SendRaw, % hs.Replacement
         }
     }
 }
@@ -139,9 +138,10 @@ return
 ; ----------------------------------------------------------------------------
 ;region HotKeys and HotStrings definitions
 ; #IfWinNotActive, ahk_exe Code.exe
+F2::
 F1::
     OutputDebug, % "HotKey F1 Pressed `n"
-    Picker_Show()
+    Picker_Gui_Show()
 return
 #IfWinActive
 ;endregion
