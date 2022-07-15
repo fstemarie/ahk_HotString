@@ -14,7 +14,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 ; ----------------------------------------------------------------------------
 
 #include <ObjCSV>
-#include <Configuration>
+#include <Configuration.cls>
 #include <Picker>
 #include *i <Password>
 
