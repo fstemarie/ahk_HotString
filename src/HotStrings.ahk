@@ -24,8 +24,8 @@ global config
 ;region Auto-Execute Section
 config := Get_Config()
 Check_Config()
-Load_CSV() ; Loads the data from the CSV file
 Picker_Gui_Build()
+Load_CSV() ; Loads the data from the CSV file
 return
 ;endregion
 
@@ -91,7 +91,6 @@ Load_CSV() {
         if trigger {
             if !hsCol.HasKey(trigger)
                 hsCol[trigger] := []
-            ; hs := {Trigger: row["Trigger"], Replacement: row["Replacement"], Treated: row["Treated"]}
             hsCol[trigger].Push(hs)
         }
         i--
@@ -140,7 +139,7 @@ return
 ; #IfWinNotActive, ahk_exe Code.exe
 F2::
 F1::
-    OutputDebug, % "HotKey F1 Pressed `n"
+    OutputDebug, % "#### HotKey F1 Pressed `n"
     Picker_Gui_Show()
 return
 #IfWinActive
