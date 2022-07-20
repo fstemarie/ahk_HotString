@@ -16,6 +16,7 @@ global PICKER_HWND
 , PICKER_BTNQUIT
 , PICKER_BTNNEW
 , PICKER_BTNDELETE
+, PICKER_BTNRENAME
 , PICKER_BTNSAVE
 , PICKER_TVNOTES
 , PICKER_IMGLIST
@@ -25,11 +26,7 @@ global PICKER_HWND
 category :=
 
 Picker_Load_HotStrings(objCSV) {
-    WM_ACTIVATEAPP := 0x001C
-    LVM_SETHOVERTIME := 0x1047
-    LVS_EX_HEADERDRAGDROP := 0x10
-    LVS_EX_TRACKSELECT := 0x8
-
+    OutputDebug, % "-- Picker_Load_HotStrings() `n"
     if !objCSV or objCSV.Count() = 0
         return
     loop % objCSV.Count()
@@ -82,6 +79,10 @@ Picker_Gui_Build() {
     global category
     totalWidth := 1000
     totalHeight := 600
+    WM_ACTIVATEAPP := 0x001C
+    LVM_SETHOVERTIME := 0x1047
+    LVS_EX_HEADERDRAGDROP := 0x10
+    LVS_EX_TRACKSELECT := 0x8
 
     PICKER_IMGLIST := IL_Create(2)
     IL_Add(PICKER_IMGLIST, "shell32.dll", 2)
@@ -99,8 +100,8 @@ Picker_Gui_Build() {
     w := (totalWidth - 20) * 0.8
     h := (totalHeight - 51) * 0.92
     Gui, Add, ListView, w%w% h%h% +AltSubmit -Multi +Grid -Border
-    +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND +gPicker_lvPicker_OnEvent
-    +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP% Section
+        +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND +gPicker_lvPicker_OnEvent
+        +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP% Section
     PostMessage, %LVM_SETHOVERTIME%, 0, 1,, ahk_id %PICKER_LVPICKER_HWND%
     LV_InsertCol(1, 0, "Treated")
     LV_InsertCol(2, 150, "Trigger")
@@ -108,7 +109,7 @@ Picker_Gui_Build() {
     w := (totalWidth - 20) * 0.2
     h := (totalHeight - 51) * 0.08
     Gui, Add, ListBox, ys w%w% hp 0x100 -Border Sort
-    +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent
+        +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent
     Gui, Add, Button, xs w150 h%h% +vPICKER_BTNDOC +gPicker_btnDoc_OnClick Section, Edit &Doc
     Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT +gPicker_btnEdit_OnClick, &Text Editor
     Gui, Add, Button, ys wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
@@ -118,8 +119,8 @@ Picker_Gui_Build() {
     Gui, Tab, 2
     w := (totalWidth - 20) * 0.35
     h := (totalHeight - 51) * 0.92
-    Gui, Add, TreeView, w%w% h%h% Section +vPICKER_TVNOTES
-    +gPicker_tvNotes_OnEvent +ImageList%PICKER_IMGLIST%
+    Gui, Add, TreeView, w%w% h%h% -ReadOnly +WantF2 Section +vPICKER_TVNOTES
+        +gPicker_tvNotes_OnEvent +ImageList%PICKER_IMGLIST%
     w := (totalWidth - 20) * 0.65
     h := (totalHeight - 51) * 0.08
     Gui, Add, Edit, ys w%w% hp +WantTab +vPICKER_EDTNOTE +gPicker_edtNote_OnChange
@@ -226,16 +227,34 @@ Picker_lbCategories_Update(categories) {
 
 Picker_lvPicker_OnEvent() {
     OutputDebug, % "-- Picker_lvPicker_OnEvent() `n"
-    Gui, ListView, PICKER_LVPICKER
     LV_GetText(cell, A_EventInfo, 3)
-    LV_GetText(treated, A_EventInfo, 1)
-    if (A_GuiEvent == "Normal") {
-        Gui, Picker:Hide
-        if (!treated) {
-            SendRaw, %cell%
-        } else {
-            Send, %cell%
+    switch A_GuiEvent {
+        case "Normal": {
+            LV_GetText(treated, A_EventInfo, 1)
+            Gui, Picker:Hide
+            if (!treated) {
+                SendRaw, %cell%
+            } else {
+                Send, %cell%
+            }
         }
+        case "I": {
+            if InStr(ErrorLevel, "f") {
+                ToolTip
+            }
+            if InStr(ErrorLevel, "F") {
+                MouseGetPos, mouseX, mouseY
+                ToolTip, %cell%, %mouseX%, %mouseY%
+                SetTimer, Picker_lvPicker_RemoveToolTip
+            }
+        }
+    }
+}
+
+Picker_lvPicker_RemoveToolTip() {
+    if (A_TimeIdle < 100 or A_TimeIdle > 3000) {
+        ToolTip
+        SetTimer, Picker_lvPicker_OnTimer, Off
     }
 }
 
@@ -288,7 +307,6 @@ Picker_btnSubmit_OnClick() {
     OutputDebug, % "-- Picker_btnSubmit_OnClick() `n"
     GuiControlGet, focused, Picker:FocusV
     if (focused = "PICKER_LVPICKER") {
-        ; Gui, ListView, PICKER_LVPICKER
         row := LV_GetNext(1, F)
         LV_GetText(treated, row, 1)
         LV_GetText(cell, row, 3)
@@ -302,6 +320,7 @@ Picker_btnSubmit_OnClick() {
 }
 
 Picker_tvNotes_OnMenu(itemName, itemPos, MenuName) {
+    OutputDebug, % "-- Picker_tvNotes_OnMenu() `n"
     switch itemPos {
         case 1:
             Picker_Notes_New()
@@ -316,38 +335,45 @@ Picker_tvNotes_OnEvent() {
     OutputDebug, % "-- Picker_tvNotes_OnEvent() `n"
     static lastID
     switch A_GuiEvent {
-    case "S":
-        if lastID {
-            if notesCol[lastID].Dirty {
-                message := "
-                ( Join
-                    You have changes that have not been saved yet.`n
-                    Do you want to save those changes ?
-                )" 
-                MsgBox, 0x2034, Unsaved note, %message%
-                IfMsgBox, Yes
-                    Picker_Notes_Save(lastID)
-                IfMsgBox, No
-                    Picker_Notes_Cancel(lastID)
+        case "S": {
+            if lastID {
+                if notesCol[lastID].Dirty {
+                    message := "
+                    ( Join
+                        You have changes that have not been saved yet.`n
+                        Do you want to save those changes ?
+                    )" 
+                    MsgBox, 0x2034, Unsaved note, %message%
+                    IfMsgBox, Yes
+                        Picker_Notes_Save(lastID)
+                    IfMsgBox, No
+                        Picker_Notes_Cancel(lastID)
+                }
+            }
+            note := notesCol[A_EventInfo]
+            GuiControl, Text, PICKER_EDTNOTE,
+            fullPath := note.FullPath
+            if !note.Directory {
+                file := FileOpen(fullPath, "R")
+                if !file {
+                    MsgBox, Cannot open file %fullPath% reading
+                    return
+                }
+                content := file.Read()
+                file.close()
+                GuiControl, Text, PICKER_EDTNOTE, %content%
+                GuiControlGet, content,, PICKER_EDTNOTE
+                note.Content := content
+                lastID := A_EventInfo
             }
         }
-        note := notesCol[A_EventInfo]
-        GuiControl, Text, PICKER_EDTNOTE,
-        fullPath := note.FullPath
-        if !note.Directory {
-            file := FileOpen(fullPath, "R")
-            if !file {
-                MsgBox, Cannot open file %fullPath% reading
-                return
-            }
-            content := file.Read()
-            file.close()
-            GuiControl, Text, PICKER_EDTNOTE, %content%
-            GuiControlGet, content,, PICKER_EDTNOTE
-            note.Content := content
+
+        case "e": {
+            note := notesCol[A_EventInfo]
+            TV_GetText(newName, A_EventInfo)
+            note.rename(newName)
         }
     }
-    lastID := A_EventInfo
 }
 
 Picker_tvNotes_Update()
