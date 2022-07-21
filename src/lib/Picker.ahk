@@ -326,7 +326,7 @@ Picker_tvNotes_OnMenu(itemName, itemPos, MenuName) {
         case 2:
             Picker_Notes_Delete()
         case 3:
-            Picker_Notes_Rename()
+            Send, {F2}
     }
 }
 
@@ -369,8 +369,14 @@ Picker_tvNotes_OnEvent() {
 
         case "e": {
             note := notesCol[A_EventInfo]
-            TV_GetText(newName, A_EventInfo)
-            note.rename(newName)
+            oldTitle := note.Title
+            TV_GetText(newTitle, A_EventInfo)
+            try {
+                note.rename(newTitle)
+            } catch e {
+                TV_Modify(A_EventInfo,, oldTitle)
+                MsgBox 0x2030, Error, %e%
+            }
         }
     }
 }
