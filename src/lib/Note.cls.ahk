@@ -19,11 +19,11 @@ Class Note {
         }
     }
 
-    FileName {
+    Title {
         get {
             fullPath := this._fullPath
-            SplitPath fullPath,,,,fileName
-            return fileName
+            SplitPath fullPath,,,,fileNameNoExt
+            return fileNameNoExt
         }
     }
 
@@ -71,6 +71,23 @@ Class Note {
         }
         set {
             this._content := value
+        }
+    }
+
+    Rename(newTitle) {
+        if RegExMatch(newTitle, "[\\\/\:\*\?\|\<\>\""]+") {
+            throw "
+            ( Join
+            Invalid file name`n
+            File name cannot contain "", \, /, :, *, ?, |, <, >
+            )"
+        }
+        fullPath := this._fullPath
+        SplitPath, fullPath,, dest
+        dest := dest . "\" . newTitle . ".txt"
+        FileMove, %fullPath%, %dest%
+        if ErrorLevel {
+            throw "Error while renaming file"
         }
     }
 }
