@@ -137,12 +137,14 @@ return
 ; ----------------------------------------------------------------------------
 ;region HotKeys and HotStrings definitions
 ; #IfWinNotActive, ahk_exe Code.exe
-F2::
+#if !A_IsCompiled
+^F1::
+#if A_IsCompiled
 F1::
     OutputDebug, % "#### HotKey F1 Pressed `n"
     Picker_Gui_Show()
 return
-#IfWinActive
+; #IfWinActive
 ;endregion
 
 #include *i <Corrections>
