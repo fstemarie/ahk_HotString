@@ -126,7 +126,6 @@ Picker_Gui_Build() {
     Gui, Add, Edit, ys w%w% hp +WantTab +vPICKER_EDTNOTE +gPicker_edtNote_OnChange
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
     Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
-    Gui, Add, Button, ys wp hp +vPICKER_BTNRENAME +gPicker_btnRename_OnClick, &Rename
     Gui, Add, Button, ys wp hp Disabled +vPICKER_BTNSAVE +gPicker_btnSave_OnClick, &Save
     Gui, Show, w%totalWidth% h%totalHeight% Hide
 
@@ -490,11 +489,6 @@ Picker_btnNew_OnClick() {
 Picker_btnDelete_OnClick() {
     OutputDebug, % "-- Picker_btnDelete_OnClick() `n"
     Picker_Notes_Delete()
-}
-
-Picker_btnRename_OnClick() {
-    OutputDebug, % "-- Picker_btnRename_OnClick() `n"
-    Picker_Notes_Rename()
 }
 
 Picker_btnSave_OnClick() {
