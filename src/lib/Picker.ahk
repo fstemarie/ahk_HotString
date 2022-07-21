@@ -97,8 +97,8 @@ Picker_Gui_Build() {
     Gui, Add, Tab3, +vPICKER_TABS x0 y0 w1000 h600, Picker|Notes
 
     Gui, Tab, 1
-    w := (totalWidth - 20) * 0.8
-    h := (totalHeight - 51) * 0.92
+    w := (totalWidth - 19) * 0.8
+    h := (totalHeight - 49) * 0.92
     Gui, Add, ListView, w%w% h%h% +AltSubmit -Multi +Grid -Border
         +vPICKER_LVPICKER +HwndPICKER_LVPICKER_HWND +gPicker_lvPicker_OnEvent
         +LV%LVS_EX_TRACKSELECT% +LV%LVS_EX_HEADERDRAGDROP% Section
@@ -106,8 +106,8 @@ Picker_Gui_Build() {
     LV_InsertCol(1, 0, "Treated")
     LV_InsertCol(2, 150, "Trigger")
     LV_InsertCol(3, 20000, "Replacement")
-    w := (totalWidth - 20) * 0.2
-    h := (totalHeight - 51) * 0.08
+    w := (totalWidth - 19) * 0.2
+    h := (totalHeight - 49) * 0.08
     Gui, Add, ListBox, ys w%w% hp 0x100 -Border Sort
         +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent
     Gui, Add, Button, xs w150 h%h% +vPICKER_BTNDOC +gPicker_btnDoc_OnClick Section, Edit &Doc
@@ -117,12 +117,12 @@ Picker_Gui_Build() {
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
 
     Gui, Tab, 2
-    w := (totalWidth - 20) * 0.35
-    h := (totalHeight - 51) * 0.92
+    w := (totalWidth - 19) * 0.35
+    h := (totalHeight - 49) * 0.92
     Gui, Add, TreeView, w%w% h%h% -ReadOnly +WantF2 Section +vPICKER_TVNOTES
         +gPicker_tvNotes_OnEvent +ImageList%PICKER_IMGLIST%
-    w := (totalWidth - 20) * 0.65
-    h := (totalHeight - 51) * 0.08
+    w := (totalWidth - 19) * 0.65
+    h := (totalHeight - 49) * 0.08
     Gui, Add, Edit, ys w%w% hp +WantTab +vPICKER_EDTNOTE +gPicker_edtNote_OnChange
     Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
     Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
