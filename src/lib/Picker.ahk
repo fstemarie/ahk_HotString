@@ -253,7 +253,7 @@ Picker_lvPicker_OnEvent() {
 Picker_lvPicker_RemoveToolTip() {
     if (A_TimeIdle < 100 or A_TimeIdle > 3000) {
         ToolTip
-        SetTimer, Picker_lvPicker_OnTimer, Off
+        SetTimer, Picker_lvPicker_RemoveToolTip, Off
     }
 }
 
