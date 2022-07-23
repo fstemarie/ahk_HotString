@@ -21,8 +21,9 @@ Class Configuration {
         }
         set {
             configFile := this._configFile
-            if (SubStr(value, -4) = ".csv" ) {
-                if InStr(FileExist(value), "N") {
+            test := SubStr(value, -3)
+            if (SubStr(value, -3) = ".csv" ) {
+                if FileExist(value) {
                     IniWrite, %value%, %configFile%, Configuration, csvFile
                     this._csvFile := value
                 } else {
