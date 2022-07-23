@@ -133,6 +133,7 @@ Picker_Gui_Build() {
     Menu, tvNotes_Menu, Add, Delete Note, Picker_tvNotes_OnMenu
     Menu, tvNotes_Menu, Add, Rename Note, Picker_tvNotes_OnMenu
 
+    Gui, Show, Hide W%totalWidth% H%totalHeight%
     AutoXYWH("reset")
     OnMessage(WM_ACTIVATEAPP, "Picker_Gui_OnWMACTIVATEAPP")
     category := config.defaultCategory?config.defaultCategory:"*"
@@ -299,7 +300,9 @@ Picker_btnDoc_OnClick() {
 
 Picker_btnEdit_OnClick() {
     OutputDebug, % "-- Picker_btnEdit_OnClick() `n"
-    Run, notepad.exe
+    Editors_RemoveEnded()
+    Editors_Add()
+    Editors_Tile()
 }
 
 Picker_btnSubmit_OnClick() {

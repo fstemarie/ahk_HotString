@@ -16,6 +16,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include <ObjCSV>
 #include <Configuration.cls>
 #include <Picker>
+#include <Editors>
 #include *i <Password>
 
 global config
@@ -141,9 +142,19 @@ return
 ^F1::
 #if A_IsCompiled
 F1::
+    KeyWait, F1, T1
+    if ErrorLevel {
+        OutputDebug, % "#### HotKey F1 Long Pressed `n"
+        SoundBeep
+        Editors_RemoveEnded()
+        Editors_Tile()
+        return
+    }
     OutputDebug, % "#### HotKey F1 Pressed `n"
     Picker_Gui_Show()
 return
+#if
+
 ; #IfWinActive
 ;endregion
 
