@@ -23,6 +23,7 @@ global PICKER_HWND
 , PICKER_EDTNOTE
 , notesCol
 
+notesCol :=
 category :=
 
 Picker_Load_HotStrings(objCSV) {
@@ -335,6 +336,7 @@ Picker_tvNotes_OnMenu(itemName, itemPos, MenuName) {
 
 Picker_tvNotes_OnEvent() {
     OutputDebug, % "-- Picker_tvNotes_OnEvent() `n"
+    global notesCol
     static lastID
     switch A_GuiEvent {
         case "S": {
@@ -401,6 +403,7 @@ Picker_tvNotes_Update()
 }
 
 Picker_tvNotes_Recurse(path, currentID) {
+    global notesCol
     notesCol := notesCol?notesCol:{}
 
     loop, Files, %path%\*.*, DF
@@ -420,6 +423,7 @@ Picker_tvNotes_Recurse(path, currentID) {
 
 Picker_edtNote_OnChange() {
     OutputDebug, % "-- Picker_edtNote_OnChanges() `n"
+    global notesCol
     note := notesCol[Picker_Get_NoteID()]
     GuiControlGet, content,, PICKER_EDTNOTE
     if note.Content != content {
@@ -443,6 +447,7 @@ Picker_Notes_New() {
 
 Picker_Notes_Delete() {
     OutputDebug, % "-- Picker_Notes_Delete `n"
+    global notesCol
     noteID := Picker_Get_NoteID()
     directory := notesCol[noteID].Directory
     fullPath := notesCol[noteID].FullPath
@@ -466,6 +471,7 @@ Picker_Notes_Rename() {
 
 Picker_Notes_Save(noteID) {
     OutputDebug, % "-- Picker_edtNote_SaveChanges() `n"
+    global notesCol
     note := notesCol[noteID]
     GuiControlGet, content,, PICKER_EDTNOTE
     file := FileOpen(note.FullPath, "W")
