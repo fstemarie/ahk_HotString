@@ -220,11 +220,11 @@ Picker_lvPicker_OnEvent() {
             if InStr(ErrorLevel, "f") {
                 ToolTip
             }
-            if InStr(ErrorLevel, "F") {
-                MouseGetPos, mouseX, mouseY
-                ToolTip, %cell%, %mouseX%, %mouseY%
-                SetTimer, Picker_lvPicker_RemoveToolTip
-            }
+        }
+        case "RightClick": {
+            MouseGetPos, mouseX, mouseY
+            ToolTip, %cell%, %mouseX%, %mouseY%
+            SetTimer, Picker_lvPicker_RemoveToolTip
         }
     }
 }
