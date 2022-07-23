@@ -4,6 +4,7 @@
 #include <AnimateWindow>
 #include <AutoXYWH>
 #include <Note.cls>
+#include <Tools>
 
 global PICKER_HWND
 , PICKER_TABS
@@ -43,30 +44,6 @@ Picker_Load_HotStrings(objCSV) {
     categories := "*|" . categories
     Picker_lbCategories_Update(categories)
     Picker_lvPicker_Update(objCSV)
-}
-
-Picker_Find_Center(mon, W, H) {
-    OutputDebug, % "-- Picker_Find_Center() `n"
-    SysGet, mon, Monitor, %mon%
-    X := Ceil(monLeft + (monRight - monLeft - W) / 2),
-    Y := Ceil(monTop + (monBottom - monTop - H) / 2)
-    return {"X": X, "Y": Y}
-}
-
-Picker_Get_Monitor() {
-    OutputDebug, % "-- Picker_GetMonitor() `n"
-    CoordMode, Mouse, Screen
-    MouseGetPos, mouseX, mouseY
-    SysGet, monCount, MonitorCount
-    mon := 1
-    loop % monCount
-    {
-        SysGet, mon, Monitor, %A_Index%
-        if mouseX between %monLeft% and %monRight%
-            if mouseY between %monTop% and %monBottom%
-            mon := A_Index
-    }
-    return mon
 }
 
 Picker_Get_NoteID() {
@@ -155,8 +132,8 @@ Picker_Gui_Show() {
 
     ; Places the GUI Window in the center of the screen
     WinGetPos,,, W, H
-    mon := Picker_Get_Monitor()
-    ctr := Picker_Find_Center(mon, W, H)
+    mon := Get_CurrentMonitor()
+    ctr := Find_Center(mon, W, H)
     Gui, Picker:Show, % "x"ctr.X " y"ctr.Y " hide"
     AnimateWindow(PICKER_HWND, 125, AW_ACTIVATE + AW_BLEND)
     WinActivate
