@@ -20,6 +20,7 @@ SetWorkingDir %A_ScriptDir% ; Ensures a consistent starting directory.
 #include *i <Password>
 
 global config
+hsCol := {}
 
 ; ----------------------------------------------------------------------------
 ;region Auto-Execute Section
@@ -69,7 +70,7 @@ Check_Config() {
 ; Load the CSV file, send the data to the gui
 Load_CSV() {
     OutputDebug, % "-- Load_CSV() `n"
-    hsCol := {}
+    global hsCol
     objCSV := ObjCSV_CSV2Collection(config.csvFile
     , "Trigger,Replacement,Category,Treated", False)
 
@@ -114,22 +115,22 @@ Create_HotStrings(hsCol) {
 ; Send the replacement text related to the trigger
 Send_Replacement() {
     OutputDebug, % "-- Send_Replacement() `n"
+    global hsCol
     trigger := SubStr(A_ThisHotkey, 4)
     if hsCol.HasKey(trigger) {
         arrHS := hsCol[trigger]
         OutputDebug, % A_Tab . "Trigger = " . trigger
         OutputDebug, % A_Tab . "arrHS.Count() = " . arrHS.Count()
-        if arrHS.Count() = 1 {
+        if arrHS.Count() = 1
             hs := arrHS[1]
-        } else if arrHS.Count() > 1 {
+        else if arrHS.Count() > 1 {
             hs := arrHS.Pop()
             arrHS.InsertAt(1, hs)
         }
-        if hs.Treated {
+        if hs.Treated
             Send, % hs.Replacement
-        } else {
+        else
             SendRaw, % hs.Replacement
-        }
     }
 }
 return
