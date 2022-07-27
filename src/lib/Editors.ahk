@@ -1,3 +1,5 @@
+#include <Tools>
+
 editors := []
 
 Editors_Add() {
@@ -37,6 +39,8 @@ Editors_Tile() {
     {
         X := monLeft + W * (i - 1)
         WinMove, ahk_pid %pid%,, %X%, %Y%, %W%, %H%
-        WinSet, Top
+        WinSet, AlwaysOnTop, On, ahk_pid %pid%
+        Sleep 100
+        WinSet, AlwaysOnTop, Off, ahk_pid %pid%
     }
 }
