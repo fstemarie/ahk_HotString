@@ -150,6 +150,11 @@ Picker_Gui_OnEscape() {
     AnimateWindow(PICKER_HWND, 125, AW_HIDE + AW_BLEND)
 }
 
+Picker_Gui_OnClose() {
+    OutputDebug, % "-- Picker_Gui_OnClose() `n"
+    AnimateWindow(PICKER_HWND, 125, AW_HIDE + AW_BLEND)
+}
+
 Picker_Gui_OnSize() {
     OutputDebug, % "-- Picker_Gui_OnSize() `n"
     if (A_EventInfo = 1)
@@ -163,7 +168,6 @@ Picker_Gui_OnSize() {
     GuiControl, Move, PICKER_BTNEDIT, % "y"posH+10
     GuiControl, Move, PICKER_BTNRELOAD, % "y"posH+10
     GuiControl, Move, PICKER_BTNQUIT, % "y"posH+10
-
     GuiControlGet, pos, Pos, PICKER_TVNOTES
     GuiControl, Move, PICKER_BTNNEW, % "y"posH+10
     GuiControl, Move, PICKER_BTNDELETE, % "y"posH+10
@@ -173,18 +177,21 @@ Picker_Gui_OnSize() {
 Picker_Gui_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
     if (hwnd = PICKER_HWND)
     {
-        OutputDebug, % "-- Picker_Gui_OnWMACTIVATEAPP() `n"
+        ; OutputDebug, % "-- Picker_Gui_OnWMACTIVATEAPP() `n"
         if (!wParam)
-        {
-            OutputDebug, % A_Tab . "Window Deactivated `n"
-            Gui, Picker:Hide
-            return 0
-        }
-        Else
-        {
-            OutputDebug, % A_Tab . "Window Activated `n"
-        }
+            Picker_Gui_OnDeactivate()
+        else
+            Picker_Gui_OnActivate()
     }
+}
+
+Picker_Gui_OnActivate() {
+    OutputDebug, % "-- Picker_Gui_OnActivate() `n"
+}
+
+Picker_Gui_OnDeactivate() {
+    OutputDebug, % "-- Picker_Gui_OnDeactivate() `n"
+    ; Gui, Picker:Hide
 }
 
 Picker_lbCategories_OnEvent() {
