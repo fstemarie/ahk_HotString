@@ -324,6 +324,7 @@ Picker_tvNotes_OnEvent() {
     static lastID
     switch A_GuiEvent {
         case "S": {
+            GuiControl, Enable, PICKER_EDTNOTE
             if lastID {
                 if notesCol[lastID].Dirty {
                     message := "
@@ -447,6 +448,8 @@ Picker_Notes_Delete() {
             TV_Delete(noteID)
         }
     }
+    GuiControl, Text, PICKER_EDTNOTE,
+    GuiControl, Disable, PICKER_EDTNOTE
 }
 
 Picker_Notes_Rename() {
