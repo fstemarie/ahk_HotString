@@ -36,9 +36,6 @@ Picker_Load_HotStrings(objCSV) {
         category := objCSV[A_Index]["Category"]
         ; Gather all the categories
         categories .= category . "|"
-        ; Find the default category if there is one
-        if SubStr(cat, 1, 1) = "@"
-            config.defaultCategory := category
     }
     Sort, categories, U D|
     categories := "*|" . categories
@@ -150,6 +147,11 @@ Picker_Gui_OnEscape() {
     AnimateWindow(PICKER_HWND, 125, AW_HIDE + AW_BLEND)
 }
 
+Picker_Gui_OnClose() {
+    OutputDebug, % "-- Picker_Gui_OnClose() `n"
+    AnimateWindow(PICKER_HWND, 125, AW_HIDE + AW_BLEND)
+}
+
 Picker_Gui_OnSize() {
     OutputDebug, % "-- Picker_Gui_OnSize() `n"
     if (A_EventInfo = 1)
@@ -163,7 +165,6 @@ Picker_Gui_OnSize() {
     GuiControl, Move, PICKER_BTNEDIT, % "y"posH+10
     GuiControl, Move, PICKER_BTNRELOAD, % "y"posH+10
     GuiControl, Move, PICKER_BTNQUIT, % "y"posH+10
-
     GuiControlGet, pos, Pos, PICKER_TVNOTES
     GuiControl, Move, PICKER_BTNNEW, % "y"posH+10
     GuiControl, Move, PICKER_BTNDELETE, % "y"posH+10
@@ -173,18 +174,21 @@ Picker_Gui_OnSize() {
 Picker_Gui_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
     if (hwnd = PICKER_HWND)
     {
-        OutputDebug, % "-- Picker_Gui_OnWMACTIVATEAPP() `n"
+        ; OutputDebug, % "-- Picker_Gui_OnWMACTIVATEAPP() `n"
         if (!wParam)
-        {
-            OutputDebug, % A_Tab . "Window Deactivated `n"
-            Gui, Picker:Hide
-            return 0
-        }
-        Else
-        {
-            OutputDebug, % A_Tab . "Window Activated `n"
-        }
+            Picker_Gui_OnDeactivate()
+        else
+            Picker_Gui_OnActivate()
     }
+}
+
+Picker_Gui_OnActivate() {
+    OutputDebug, % "-- Picker_Gui_OnActivate() `n"
+}
+
+Picker_Gui_OnDeactivate() {
+    OutputDebug, % "-- Picker_Gui_OnDeactivate() `n"
+    ; Gui, Picker:Hide
 }
 
 Picker_lbCategories_OnEvent() {
@@ -317,6 +321,7 @@ Picker_tvNotes_OnEvent() {
     static lastID
     switch A_GuiEvent {
         case "S": {
+            GuiControl, Enable, PICKER_EDTNOTE
             if lastID {
                 if notesCol[lastID].Dirty {
                     message := "
@@ -440,6 +445,8 @@ Picker_Notes_Delete() {
             TV_Delete(noteID)
         }
     }
+    GuiControl, Text, PICKER_EDTNOTE,
+    GuiControl, Disable, PICKER_EDTNOTE
 }
 
 Picker_Notes_Rename() {

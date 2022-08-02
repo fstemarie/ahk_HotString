@@ -56,7 +56,7 @@ Check_Config() {
         }
     }
     if !config.notesDir {
-        FileSelectFolder, fsfValue, %A_MyDocuments%,, Choose a folder for notes
+        FileSelectFolder, fsfValue, *%A_MyDocuments%,, Choose a folder for notes
         if (fsfValue) {
             config.notesDir := fsfValue
         } else {

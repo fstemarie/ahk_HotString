@@ -6,6 +6,7 @@
             "type": "process",
             "command": "C:/Program Files/AutoHotkey/Compiler/Ahk2Exe.exe",
             "args": [
+                "/compress", "2",
                 "/in", "${workspaceFolder}/src/HotStrings.ahk",
                 "/out", "${workspaceFolder}/dist/HotStrings.exe"
             ],
