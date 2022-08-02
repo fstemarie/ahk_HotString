@@ -71,38 +71,13 @@ Check_Config() {
 Load_CSV() {
     OutputDebug, % "-- Load_CSV() `n"
     global hsCol
-    objCSV := ObjCSV_CSV2Collection(config.csvFile
-    , "Trigger,Replacement,Category,Treated", False)
 
-    if !objCSV {
-        MsgBox, 0x1016, Critical Error, Error loading CSV File
-        ExitApp 1
-    }
-    if objCSV.Count() = 0
-        return
-    i := objCSV.MaxIndex()
-    while i >= objCSV.MinIndex() {
-        ; Remove rows that don't have the Text field filled
-        hs := objCSV[i]
-        if !hs.Replacement {
-            objCSV.RemoveAt(i--)
-            continue
-        }
-        trigger := hs["Trigger"] := trim(hs["Trigger"])
-        ; Fill hsCol with all the hotstrings
-        if trigger {
-            if !hsCol.HasKey(trigger)
-                hsCol[trigger] := []
-            hsCol[trigger].Push(hs)
-        }
-        i--
-    }
-    Create_HotStrings(hsCol)
+    Register_HotStrings(hsCol)
     Picker_Load_HotStrings(objCSV)
 }
 
 ; From the loaded data, create the hotstrings
-Create_HotStrings(hsCol) {
+Register_HotStrings(hsCol) {
     OutputDebug, % "-- Create_HotStrings() `n"
 
     ; Setup HotStrings
