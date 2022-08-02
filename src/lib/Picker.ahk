@@ -36,9 +36,6 @@ Picker_Load_HotStrings(objCSV) {
         category := objCSV[A_Index]["Category"]
         ; Gather all the categories
         categories .= category . "|"
-        ; Find the default category if there is one
-        if SubStr(cat, 1, 1) = "@"
-            config.defaultCategory := category
     }
     Sort, categories, U D|
     categories := "*|" . categories
