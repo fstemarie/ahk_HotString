@@ -103,7 +103,7 @@ Class Configuration {
         }
         set {
             configFile := this._configFile
-            IniWrite, value, %configFile%, Configuration, defaultCategory
+            IniWrite, %value%, %configFile%, Configuration, defaultCategory
             this._defaultCategory := value
         }
     }
