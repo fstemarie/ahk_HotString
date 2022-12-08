@@ -1,3 +1,5 @@
+#include <base64>
+
 Send_Password() {
     password := Fetch_Password()
 
@@ -13,7 +15,7 @@ Fetch_Password() {
         + "KeePassCommand.exe getfield Citrix Password | clip"
         RunWait, %cmd%,, Hide
         out := RegExReplace(Clipboard, "(\s+)|(\r\n)", " ")
-        password := StrSplit(out, " ")[8]
+        password := b64Decode(StrSplit(out, " ")[8])
     }
     Clipboard := oldClip
     return password
