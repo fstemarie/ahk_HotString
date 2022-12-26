@@ -184,11 +184,17 @@ Picker_Gui_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
 
 Picker_Gui_OnActivate() {
     OutputDebug, % "-- Picker_Gui_OnActivate() `n"
+    SetTimer, GuiHide, Off
 }
 
 Picker_Gui_OnDeactivate() {
     OutputDebug, % "-- Picker_Gui_OnDeactivate() `n"
-    ; Gui, Picker:Hide
+    SetTimer, GuiHide, 1000
+    Return
+
+GuiHide:
+    Gui, Picker:Hide
+Return
 }
 
 Picker_lbCategories_OnEvent() {
