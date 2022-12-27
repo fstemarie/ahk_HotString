@@ -120,7 +120,7 @@ Send_Replacement() {
     if hsCol.HasKey(trigger) {
         arrHS := hsCol[trigger]
         OutputDebug, % A_Tab . "Trigger = " . trigger
-        OutputDebug, % A_Tab . "arrHS.Count() = " . arrHS.Count()
+        OutputDebug, % A_Tab . "arrHS.Count() = " . arrHS.Count() . "`n"
         if arrHS.Count() = 1
             hs := arrHS[1]
         else if arrHS.Count() > 1 {
@@ -138,28 +138,15 @@ return
 
 ; ----------------------------------------------------------------------------
 ;region HotKeys and HotStrings definitions
-; #IfWinNotActive, ahk_exe Code.exe
+
 #if !A_IsCompiled
 ^F1::
-    KeyWait, CTRL, T1
-    if ErrorLevel {
-        OutputDebug, % "#### HotKey F1 Long Pressed `n"
-        SoundBeep
-        Editors_RemoveEnded()
-        Editors_Tile()
-        return
-    }
-    OutputDebug, % "#### HotKey F1 Pressed `n"
-    Picker_Gui_Show()
-return
-
 #if A_IsCompiled
 F1::
     KeyWait, F1, T1
     if ErrorLevel {
         OutputDebug, % "#### HotKey F1 Long Pressed `n"
         SoundBeep
-        Editors_RemoveEnded()
         Editors_Tile()
         return
     }
@@ -167,8 +154,5 @@ F1::
     Picker_Gui_Show()
 return
 #if
-
-; #IfWinActive
-;endregion
 
 #include *i <Corrections>
