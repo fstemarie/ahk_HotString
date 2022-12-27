@@ -288,9 +288,7 @@ Picker_btnDoc_OnClick() {
 
 Picker_btnEdit_OnClick() {
     OutputDebug, % "-- Picker_btnEdit_OnClick() `n"
-    Editors_RemoveEnded()
     Editors_Add()
-    Editors_Tile()
 }
 
 Picker_btnSubmit_OnClick() {

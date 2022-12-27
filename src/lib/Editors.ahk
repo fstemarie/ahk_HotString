@@ -7,7 +7,9 @@ Editors_Add() {
     global editors
     Run, notepad,,, pid
     editors.Push(pid)
-    Sleep 100
+    WinWait, ahk_pid %pid%
+    WinSetTitle, Notepad: %pid%
+    Editors_Tile()
 }
 
 Editors_RemoveEnded() {
@@ -28,6 +30,7 @@ Editors_Tile() {
     global editors
     if !editors.Count()
         return
+    Editors_RemoveEnded()
     mon := Get_CurrentMonitor()
     SysGet, mon, MonitorWorkArea, %mon%
     monWidth := monRight - monLeft
