@@ -189,7 +189,7 @@ Picker_Gui_OnActivate() {
 
 Picker_Gui_OnDeactivate() {
     OutputDebug, % "-- Picker_Gui_OnDeactivate() `n"
-    SetTimer, GuiHide, 1000
+    SetTimer, GuiHide, 2000
     Return
 
 GuiHide:
