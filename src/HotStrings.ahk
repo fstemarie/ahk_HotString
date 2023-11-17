@@ -38,8 +38,9 @@ return
 Get_Config() {
     OutputDebug, % "-- Get_Config() `n"
     configFile := SubStr(A_ScriptFullPath, 1, -4) . ".ini"
-    if !FileExist(configFile)
+    if !FileExist(configFile) {
         FileAppend,, %configFile%
+    }
     return new Configuration(configFile)
 }
 
@@ -78,8 +79,9 @@ Load_CSV() {
         MsgBox, 0x1016, Critical Error, Error loading CSV File
         ExitApp 1
     }
-    if objCSV.Count() = 0
+    if objCSV.Count() = 0 {
         return
+    }
     i := objCSV.MaxIndex()
     while i >= objCSV.MinIndex() {
         ; Remove rows that don't have the Text field filled
@@ -91,8 +93,9 @@ Load_CSV() {
         trigger := hs["Trigger"] := trim(hs["Trigger"])
         ; Fill hsCol with all the hotstrings
         if trigger {
-            if !hsCol.HasKey(trigger)
+            if !hsCol.HasKey(trigger) {
                 hsCol[trigger] := []
+            }
             hsCol[trigger].Push(hs)
         }
         i--
@@ -121,16 +124,17 @@ Send_Replacement() {
         arrHS := hsCol[trigger]
         OutputDebug, % A_Tab . "Trigger = " . trigger
         OutputDebug, % A_Tab . "arrHS.Count() = " . arrHS.Count()
-        if arrHS.Count() = 1
+        if arrHS.Count() = 1 {
             hs := arrHS[1]
-        else if arrHS.Count() > 1 {
+        } else if arrHS.Count() > 1 {
             hs := arrHS.Pop()
             arrHS.InsertAt(1, hs)
         }
-        if hs.Treated
+        if hs.Treated {
             Send, % hs.Replacement
-        else
+        } else {
             SendRaw, % hs.Replacement
+        }
     }
 }
 return
@@ -148,9 +152,10 @@ return
         Editors_RemoveEnded()
         Editors_Tile()
         return
+    } else {
+        OutputDebug, % "#### HotKey F1 Pressed `n"
+        Picker_Gui_Show()
     }
-    OutputDebug, % "#### HotKey F1 Pressed `n"
-    Picker_Gui_Show()
 return
 
 #if A_IsCompiled
@@ -162,9 +167,10 @@ F1::
         Editors_RemoveEnded()
         Editors_Tile()
         return
+    } else {
+        OutputDebug, % "#### HotKey F1 Pressed `n"
+        Picker_Gui_Show()
     }
-    OutputDebug, % "#### HotKey F1 Pressed `n"
-    Picker_Gui_Show()
 return
 #if
 
