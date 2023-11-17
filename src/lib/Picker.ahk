@@ -29,8 +29,9 @@ category :=
 
 Picker_Load_HotStrings(objCSV) {
     OutputDebug, % "-- Picker_Load_HotStrings() `n"
-    if !objCSV or objCSV.Count() = 0
+    if !objCSV or objCSV.Count() = 0 {
         return
+    }
     loop % objCSV.Count()
     {
         category := objCSV[A_Index]["Category"]
@@ -138,8 +139,9 @@ Picker_Gui_Show() {
 }
 
 Picker_Gui_OnContextMenu() {
-    if (A_GuiControl = "PICKER_TVNOTES")
+    if (A_GuiControl = "PICKER_TVNOTES") {
         Menu, tvNotes_Menu, Show, %A_GuiX%, %A_GuiY%
+    }
 }
 
 Picker_Gui_OnEscape() {
@@ -154,8 +156,9 @@ Picker_Gui_OnClose() {
 
 Picker_Gui_OnSize() {
     OutputDebug, % "-- Picker_Gui_OnSize() `n"
-    if (A_EventInfo = 1)
+    if (A_EventInfo = 1) {
         return
+    }
     AutoXYWH("wh", "PICKER_TABS", "PICKER_LVPICKER")
     AutoXYWH("xh", "PICKER_LBCATEGORIES")
     AutoXYWH("w0.3 h", "PICKER_TVNOTES")
@@ -172,13 +175,13 @@ Picker_Gui_OnSize() {
 }
 
 Picker_Gui_OnWMACTIVATEAPP(wParam, lParam, msg, hwnd) {
-    if (hwnd = PICKER_HWND)
-    {
+    if (hwnd = PICKER_HWND) {
         ; OutputDebug, % "-- Picker_Gui_OnWMACTIVATEAPP() `n"
-        if (!wParam)
+        if (!wParam) {
             Picker_Gui_OnDeactivate()
-        else
+        } else {
             Picker_Gui_OnActivate()
+        }
     }
 }
 
@@ -244,10 +247,12 @@ Picker_lvPicker_Update(new_hsCol := "") {
     OutputDebug, % "-- Picker_lvPicker_Update() `n"
     global category
     static hsCol
+
     hsCol := new_hsCol?new_hsCol:hsCol
-    if !hsCol
+    if !hsCol {
         return
-        ; Filter the Data
+    }
+    ; Filter the Data
     Gui, Picker:ListView, PICKER_LVPICKER
     LV_Delete()
     ; Fill the ListView
@@ -256,8 +261,9 @@ Picker_lvPicker_Update(new_hsCol := "") {
     loop, % hsCol.Length()
     {
         hs := hsCol[A_Index]
-        if (category != "*" and hs["Category"] != category)
+        if (category != "*" and hs["Category"] != category) {
             continue
+        }
         LV_Add("", hs["Treated"], hs["Trigger"], hs["Replacement"])
     }
     GuiControl, +Redraw, PICKER_LVPICKER
@@ -276,8 +282,9 @@ Picker_btnQuit_OnClick() {
 
 Picker_btnDoc_OnClick() {
     OutputDebug, % "-- Picker_btnDoc_OnClick() `n"
-    if config.document
+    if config.document {
         Run, % config.document
+    }
 }
 
 Picker_btnEdit_OnClick() {
@@ -396,8 +403,9 @@ Picker_tvNotes_Recurse(path, currentID) {
         } else if (A_LoopFileExt = "txt") {
             SplitPath A_LoopFileName,,,, fileName
             noteID := TV_Add(fileName, currentID, "+Icon1")
-        } else
+        } else {
             continue
+        }
         directory := InStr(A_LoopFileAttrib, "D")?True:False
         notesCol[noteID] := new Note(noteID, A_LoopFileFullPath, directory)
     }
