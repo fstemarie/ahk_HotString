@@ -9,7 +9,8 @@
             "request": "launch",
             "name": "AutoHotkey Debugger",
             "program": "${workspaceFolder}/src/HotStrings.ahk",
-            "stopOnEntry": false
+            "stopOnEntry": false,
+            "runtime": "C:/Program Files/AutoHotkey/AutoHotkeyU64.exe"
         }
     ]
 }
