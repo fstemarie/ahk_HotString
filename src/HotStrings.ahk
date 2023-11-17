@@ -144,8 +144,8 @@ return
 ;region HotKeys and HotStrings definitions
 ; #IfWinNotActive, ahk_exe Code.exe
 #if !A_IsCompiled
-^F1::
-    KeyWait, CTRL, T1
+F2::
+    KeyWait, F2, T0.5
     if ErrorLevel {
         OutputDebug, % "#### HotKey F1 Long Pressed `n"
         SoundBeep
@@ -160,7 +160,7 @@ return
 
 #if A_IsCompiled
 F1::
-    KeyWait, F1, T1
+    KeyWait, F1, T0.5
     if ErrorLevel {
         OutputDebug, % "#### HotKey F1 Long Pressed `n"
         SoundBeep
