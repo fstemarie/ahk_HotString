@@ -1,28 +1,25 @@
-
-; ----------------------------------------------------------------------------
-
 #include <AnimateWindow>
 #include <AutoXYWH>
 #include <Note.cls>
 #include <Tools>
 
 global PICKER_HWND
-, PICKER_TABS
-, PICKER_LVPICKER
-, PICKER_LVPICKER_HWND
-, PICKER_LBCATEGORIES
-, PICKER_BTNDOC
-, PICKER_BTNEDIT
-, PICKER_BTNRELOAD
-, PICKER_BTNQUIT
-, PICKER_BTNNEW
-, PICKER_BTNDELETE
-, PICKER_BTNRENAME
-, PICKER_BTNSAVE
-, PICKER_TVNOTES
-, PICKER_IMGLIST
-, PICKER_EDTNOTE
-, notesCol
+    , PICKER_TABS
+    , PICKER_LVPICKER
+    , PICKER_LVPICKER_HWND
+    , PICKER_LBCATEGORIES
+    , PICKER_BTNDOC
+    , PICKER_BTNEDIT
+    , PICKER_BTNRELOAD
+    , PICKER_BTNQUIT
+    , PICKER_BTNNEW
+    , PICKER_BTNDELETE
+    , PICKER_BTNRENAME
+    , PICKER_BTNSAVE
+    , PICKER_TVNOTES
+    , PICKER_IMGLIST
+    , PICKER_EDTNOTE
+    , notesCol
 
 notesCol :=
 category :=
@@ -65,7 +62,7 @@ Picker_Gui_Build() {
     IL_Add(PICKER_IMGLIST, "shell32.dll", 4)
 
     Gui, Picker:New, +Resize +OwnDialogs +MinSize628x150 +HwndPICKER_HWND
-    +LabelPicker_Gui_On, HotStrings
+        +LabelPicker_Gui_On, HotStrings
     Gui, Default
     Gui, Color, BDC3CB
     Gui, Font, s16, Bold
@@ -86,23 +83,32 @@ Picker_Gui_Build() {
     h := (totalHeight - 49) * 0.08
     Gui, Add, ListBox, ys w%w% hp 0x100 -Border Sort
         +vPICKER_LBCATEGORIES +gPicker_lbCategories_OnEvent
-    Gui, Add, Button, xs w150 h%h% +vPICKER_BTNDOC +gPicker_btnDoc_OnClick Section, Edit &Doc
-    Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT +gPicker_btnEdit_OnClick, &Text Editor
-    Gui, Add, Button, ys wp hp +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
-    Gui, Add, Button, ys wp hp +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
+    Gui, Add, Button, xs w150 h%h% +vPICKER_BTNDOC
+        +gPicker_btnDoc_OnClick Section, Edit &Doc
+    Gui, Add, Button, ys wp hp +vPICKER_BTNEDIT
+        +gPicker_btnEdit_OnClick, &Text Editor
+    Gui, Add, Button, ys wp hp
+        +vPICKER_BTNRELOAD +gPicker_btnReload_OnClick, &Reload
+    Gui, Add, Button, ys wp hp
+        +vPICKER_BTNQUIT +gPicker_btnQuit_OnClick, &Quit
     Gui, Add, Button, Hidden Default gPicker_btnSubmit_OnClick
 
     Gui, Tab, 2
     w := (totalWidth - 19) * 0.35
     h := (totalHeight - 49) * 0.92
-    Gui, Add, TreeView, w%w% h%h% -ReadOnly +WantF2 Section +vPICKER_TVNOTES
-        +gPicker_tvNotes_OnEvent +ImageList%PICKER_IMGLIST%
+    Gui, Add, TreeView, w%w% h%h% -ReadOnly -Lines
+        +WantF2 Section +vPICKER_TVNOTES +gPicker_tvNotes_OnEvent
+        +ImageList%PICKER_IMGLIST%
     w := (totalWidth - 19) * 0.65
     h := (totalHeight - 49) * 0.08
-    Gui, Add, Edit, ys w%w% hp +WantTab +vPICKER_EDTNOTE +gPicker_edtNote_OnChange
-    Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW +gPicker_btnNew_OnClick Section, &New
-    Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE +gPicker_btnDelete_OnClick, &Delete
-    Gui, Add, Button, ys wp hp Disabled +vPICKER_BTNSAVE +gPicker_btnSave_OnClick, &Save
+    Gui, Add, Edit, ys w%w% hp +WantTab +vPICKER_EDTNOTE
+        +gPicker_edtNote_OnChange
+    Gui, Add, Button, xs w150 h45 +vPICKER_BTNNEW
+        +gPicker_btnNew_OnClick Section, &New
+    Gui, Add, Button, ys wp hp +vPICKER_BTNDELETE
+        +gPicker_btnDelete_OnClick, &Delete
+    Gui, Add, Button, ys wp hp Disabled +vPICKER_BTNSAVE
+        +gPicker_btnSave_OnClick, &Save
     Gui, Show, w%totalWidth% h%totalHeight% Hide
 
     Menu, tvNotes_Menu, Add, New Note, Picker_tvNotes_OnMenu
@@ -192,12 +198,13 @@ Picker_Gui_OnActivate() {
 
 Picker_Gui_OnDeactivate() {
     OutputDebug, % "-- Picker_Gui_OnDeactivate() `n"
-    SetTimer, HideWindow, 2000
+    SetTimer, HideWindow, 1000
     return
 
 HideWindow:
     SetTimer, HideWindow, OFF
-    Gui, Picker:Hide
+    AnimateWindow(PICKER_HWND, 125, AW_HIDE + AW_BLEND)
+    ; Gui, Picker:Hide
     return
 }
 
@@ -221,7 +228,7 @@ Picker_lvPicker_OnEvent() {
     OutputDebug, % "-- Picker_lvPicker_OnEvent() `n"
     LV_GetText(cell, A_EventInfo, 3)
     switch A_GuiEvent {
-        case "Normal": {
+    case "Normal": {
             LV_GetText(treated, A_EventInfo, 1)
             Gui, Picker:Hide
             if (!treated) {
@@ -230,12 +237,12 @@ Picker_lvPicker_OnEvent() {
                 Send, %cell%
             }
         }
-        case "I": {
+    case "I": {
             if InStr(ErrorLevel, "f") {
                 ToolTip
             }
         }
-        case "RightClick": {
+    case "RightClick": {
             MouseGetPos, mouseX, mouseY
             ToolTip, %cell%, %mouseX%, %mouseY%
             SetTimer, Picker_lvPicker_RemoveToolTip
@@ -320,12 +327,12 @@ Picker_btnSubmit_OnClick() {
 Picker_tvNotes_OnMenu(itemName, itemPos, MenuName) {
     OutputDebug, % "-- Picker_tvNotes_OnMenu() `n"
     switch itemPos {
-        case 1:
-            Picker_Notes_New()
-        case 2:
-            Picker_Notes_Delete()
-        case 3:
-            Send, {F2}
+    case 1:
+        Picker_Notes_New()
+    case 2:
+        Picker_Notes_Delete()
+    case 3:
+        Send, {F2}
     }
 }
 
@@ -334,7 +341,7 @@ Picker_tvNotes_OnEvent() {
     global notesCol
     static lastID
     switch A_GuiEvent {
-        case "S": {
+    case "S": {
             GuiControl, Enable, PICKER_EDTNOTE
             if lastID {
                 if notesCol[lastID].Dirty {
@@ -342,7 +349,7 @@ Picker_tvNotes_OnEvent() {
                     ( Join
                         You have changes that have not been saved yet.`n
                         Do you want to save those changes ?
-                    )" 
+                    )"
                     MsgBox, 0x2034, Unsaved note, %message%
                     IfMsgBox, Yes
                         Picker_Notes_Save(lastID)
@@ -368,7 +375,7 @@ Picker_tvNotes_OnEvent() {
             }
         }
 
-        case "e": {
+    case "e": {
             note := notesCol[A_EventInfo]
             oldTitle := note.Title
             TV_GetText(newTitle, A_EventInfo)
@@ -434,7 +441,8 @@ Picker_Notes_New() {
     OutputDebug, % "-- Picker_Notes_New `n"
     notesDir := config.notesDir
     Gui +OwnDialogs
-    FileSelectFile, fullPath, S 0x10, %notesDir%\New_Note.txt, Create a new Note, Notes (*.txt)
+    FileSelectFile, fullPath, S 0x10, %notesDir%\New_Note.txt
+        , Create a new Note, Notes (*.txt)
     if !ErrorLevel {
         FileAppend,, %fullPath%
         Picker_tvNotes_Update()
@@ -493,7 +501,8 @@ Picker_btnNew_OnClick() {
     OutputDebug, % "-- Picker_btnNew_OnClick() `n"
     notesDir := config.notesDir
     Gui +OwnDialogs
-    FileSelectFile, fullPath, S 0x10, %notesDir%\New_Note.txt, Create a new Note, Notes (*.txt)
+    FileSelectFile, fullPath, S 0x10, %notesDir%\New_Note.txt
+        , Create a new Note, Notes (*.txt)
     if !ErrorLevel {
         FileAppend,, %fullPath%
         Picker_tvNotes_Update()
